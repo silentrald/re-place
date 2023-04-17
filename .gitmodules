@@ -1,0 +1,7 @@
+[submodule "external/ds"]
+	path = external/ds
+	url = http://github.com/silentrald/ds-cpp.git
+[submodule "external/llhttp"]
+	path = external/llhttp
+	url = https://github.com/nodejs/llhttp.git
+	branch = release
