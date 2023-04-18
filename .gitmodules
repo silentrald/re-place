@@ -5,3 +5,6 @@
 	path = external/llhttp
 	url = https://github.com/nodejs/llhttp.git
 	branch = release
+[submodule "external/asio"]
+	path = external/asio
+	url = https://github.com/chriskohlhoff/asio.git

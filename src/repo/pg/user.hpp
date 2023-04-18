@@ -5,6 +5,9 @@
  * Created: 2023-04-15
  *============================*/
 
+#ifndef REPO_PG_USER_HPP
+#define REPO_PG_USER_HPP
+
 #include "config/types.hpp"
 #include "entity/user.hpp"
 #include "repo/user.hpp"
@@ -30,9 +33,13 @@ public:
   types::string add_user_impl(const entity::User& user) noexcept;
 
   // === Read === //
-  entity::User get_user_by_id_impl(const types::string& id) noexcept;
-  entity::User get_user_by_id_impl(const char* id) noexcept;
+  types::exp_err<entity::User>
+  get_user_by_username_impl(const types::string& username) noexcept;
+  types::exp_err<entity::User> get_user_by_username_impl(const char* username
+  ) noexcept;
 };
 
 } // namespace repo
+
+#endif
 

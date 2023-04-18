@@ -20,12 +20,12 @@ const char* PASSWORD_MAX_ERR = "Password is too long (max 60 chars)";
 
 // === User === //
 
-types::opt_err User::copy(const User& other) noexcept {
-  try_opt(this->id.copy(other.id));
-  try_opt(this->username.copy(other.username));
-  try_opt(this->password.copy(other.password));
+types::err_code User::copy(const User& other) noexcept {
+  try_err_code(this->id.copy(other.id));
+  try_err_code(this->username.copy(other.username));
+  try_err_code(this->password.copy(other.password));
 
-  return types::null;
+  return types::ec::SUCCESS;
 }
 
 // === Getters === //
@@ -47,7 +47,9 @@ const types::string& User::get_password() const noexcept {
 // === Id === //
 
 types::opt_err UserBuilder::set_id(const types::string& id) noexcept {
-  try_opt(this->id.copy(id));
+  if (this->id.copy(id) != types::ec::SUCCESS) {
+    return types::error{"Could not copy id", def_err_vals};
+  }
   return types::null;
 }
 
@@ -56,7 +58,9 @@ void UserBuilder::set_id(types::string&& id) noexcept {
 }
 
 types::opt_err UserBuilder::set_id(const char* id) noexcept {
-  try_opt(this->id.copy(id));
+  if (this->id.copy(id) != types::ec::SUCCESS) {
+    return types::error{"Could not copy id", def_err_vals};
+  }
   return types::null;
 }
 
@@ -64,7 +68,9 @@ types::opt_err UserBuilder::set_id(const char* id) noexcept {
 
 types::opt_err UserBuilder::set_username(const types::string& username
 ) noexcept {
-  try_opt(this->username.copy(username));
+  if (this->username.copy(username) != types::ec::SUCCESS) {
+    return types::error{"Could not copy username", def_err_vals};
+  }
   return types::null;
 }
 
@@ -73,7 +79,9 @@ void UserBuilder::set_username(types::string&& username) noexcept {
 }
 
 types::opt_err UserBuilder::set_username(const char* username) noexcept {
-  try_opt(this->username.copy(username));
+  if (this->username.copy(username) != types::ec::SUCCESS) {
+    return types::error{"Could not copy username", def_err_vals};
+  }
   return types::null;
 }
 
@@ -81,7 +89,9 @@ types::opt_err UserBuilder::set_username(const char* username) noexcept {
 
 types::opt_err UserBuilder::set_password(const types::string& password
 ) noexcept {
-  try_opt(this->password.copy(password));
+  if (this->password.copy(password) != types::ec::SUCCESS) {
+    return types::error{"Could not copy password", def_err_vals};
+  }
   return types::null;
 }
 
@@ -90,7 +100,9 @@ void UserBuilder::set_password(types::string&& password) noexcept {
 }
 
 types::opt_err UserBuilder::set_password(const char* password) noexcept {
-  try_opt(this->password.copy(password));
+  if (this->password.copy(password) != types::ec::SUCCESS) {
+    return types::error{"Could not copy password", def_err_vals};
+  }
   return types::null;
 }
 
@@ -101,15 +113,15 @@ types::exp_err<User> UserBuilder::build() noexcept {
   // Validation //
 
   if (this->username.is_empty()) {
-    return types::unexp_err(types::error{USERNAME_EMPTY_ERR, def_err_vals});
+    return types::unexp_err{types::error{USERNAME_EMPTY_ERR, def_err_vals}};
   }
 
   if (this->username.size() > USERNAME_MAX) {
-    return types::unexp_err(types::error{USERNAME_MAX_ERR, def_err_vals});
+    return types::unexp_err{types::error{USERNAME_MAX_ERR, def_err_vals}};
   }
 
   if (this->password.size() > PASSWORD_MAX) {
-    return types::unexp_err(types::error{PASSWORD_MAX_ERR, def_err_vals});
+    return types::unexp_err{types::error{PASSWORD_MAX_ERR, def_err_vals}};
   }
 
   User user{};

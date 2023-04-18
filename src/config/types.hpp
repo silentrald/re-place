@@ -8,11 +8,12 @@
 #ifndef CONFIG_TYPES_HPP
 #define CONFIG_TYPES_HPP
 
-#include "ds/error.hpp"
-#include "ds/expected.hpp"
+#include "ds-error/expected.hpp"
+#include "ds-error/types.hpp"
 #include "ds/optional.hpp"
 #include "ds/shared_ptr.hpp"
 #include "ds/string.hpp"
+#include "ds/types.hpp"
 #include "ds/unique_ptr.hpp"
 #include "ds/vector.hpp"
 #include <cstdint>
@@ -42,10 +43,14 @@ template <typename T> using shared_ptr = ds::shared_ptr<T>;
 const auto null = ds::null;
 
 // Error Handling
+using err_code = ds::err_code;
+
 using error = ds::error;
 using opt_err = ds::opt_err;
 template <typename T> using exp_err = ds::exp_err<T>;
 using unexp_err = ds::unexpected<error>;
+
+using namespace ds;
 
 } // namespace types
 

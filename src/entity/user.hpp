@@ -34,7 +34,7 @@ public:
   User(const User&) = delete;
   User& operator=(const User&) = delete;
 
-  [[nodiscard]] types::opt_err copy(const User& other) noexcept;
+  [[nodiscard]] types::err_code copy(const User& other) noexcept;
 
   User(User&& rhs) noexcept = default;
   User& operator=(User&& rhs) noexcept = default;
