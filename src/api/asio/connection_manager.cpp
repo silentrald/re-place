@@ -1,33 +1,33 @@
-//
-// connection_manager.cpp
-// ~~~~~~~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
+
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
 #include "connection_manager.hpp"
 
 namespace http::server {
 
-connection_manager::connection_manager() {}
-
-void connection_manager::start(connection_ptr c) {
-  connections_.insert(c);
+// NOLINTNEXTLINE
+void connection_manager::start(connection_ptr c) noexcept {
+  this->connections.insert(c);
   c->start();
 }
 
-void connection_manager::stop(connection_ptr c) {
-  connections_.erase(c);
+// NOLINTNEXTLINE
+void connection_manager::stop(connection_ptr c) noexcept {
+  this->connections.erase(c);
   c->stop();
 }
 
-void connection_manager::stop_all() {
-  for (auto c : connections_)
+void connection_manager::stop_all() noexcept {
+  for (const auto& c : this->connections)
     c->stop();
-  connections_.clear();
+  this->connections.clear();
 }
 
 } // namespace http::server

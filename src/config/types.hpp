@@ -17,6 +17,7 @@
 #include "ds/unique_ptr.hpp"
 #include "ds/vector.hpp"
 #include <cstdint>
+#include <set>
 
 namespace types {
 
@@ -36,9 +37,12 @@ using f64 = double;
 
 // === DS === //
 using string = ds::string;
+// TODO:
+template <typename T, i32 Size> using array = std::array<T, Size>;
 template <typename T> using vector = ds::vector<T>;
 template <typename T> using unique_ptr = ds::unique_ptr<T>;
 template <typename T> using shared_ptr = ds::shared_ptr<T>;
+template <typename T> using set = std::set<T>;
 
 const auto null = ds::null;
 
@@ -50,7 +54,7 @@ using opt_err = ds::opt_err;
 template <typename T> using exp_err = ds::exp_err<T>;
 using unexp_err = ds::unexpected<error>;
 
-using namespace ds;
+using namespace ds::ec;
 
 } // namespace types
 

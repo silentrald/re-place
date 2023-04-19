@@ -1,24 +1,23 @@
-//
-// header.hpp
-// ~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
 
-#ifndef HTTP_HEADER_HPP
-#define HTTP_HEADER_HPP
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
-#include <string>
+#ifndef API_ASIO_HEADER_HPP
+#define API_ASIO_HEADER_HPP
+
+#include "config/types.hpp"
 
 namespace http::server {
 
-struct header
-{
-  std::string name;
-  std::string value;
+struct header {
+  types::string name{};
+  types::string value{};
 };
 
 } // namespace http::server

@@ -9,6 +9,8 @@
 #define USE_CASE_AUTH_LOGIN_HPP
 
 #include "config/types.hpp"
+#include "ds-error/error.hpp"
+#include "ds/macro.hpp"
 #include "repo/user.hpp"
 #include <iostream>
 
@@ -21,16 +23,21 @@ private:
 public:
   Login(UserRepo* user_repo) noexcept : user_repo(user_repo) {} // NOLINT
 
-  types::opt_err execute(
+  [[nodiscard]] types::opt_err execute(
       const types::string& username, const types::string& password
   ) noexcept {
+    if (username.is_empty()) {
+      return types::error{"Username is empty", def_err_vals};
+    }
+
+    if (password.is_empty()) {
+      return types::error{"Password is empty", def_err_vals};
+    }
 
     auto user = try_exp_err(this->user_repo->get_user_by_username(username));
     if (user.get_password() != password) {
       return types::error{"Password Mismatch", def_err_vals};
     }
-
-    std::cout << "Logged In\n";
 
     return types::null;
   }

@@ -1,45 +1,42 @@
-//
-// connection_manager.hpp
-// ~~~~~~~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
 
-#ifndef HTTP_CONNECTION_MANAGER_HPP
-#define HTTP_CONNECTION_MANAGER_HPP
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
+#ifndef API_ASIO_CONNECTION_MANAGER_HPP
+#define API_ASIO_CONNECTION_MANAGER_HPP
+
+#include "config/types.hpp"
 #include "connection.hpp"
-#include <set>
 
 namespace http::server {
 
-/// Manages open connections so that they may be cleanly stopped when the server
-/// needs to shut down.
 class connection_manager {
+private:
+  types::set<connection_ptr> connections{};
+
 public:
   connection_manager(const connection_manager&) = delete;
   connection_manager& operator=(const connection_manager&) = delete;
 
-  /// Construct a connection manager.
-  connection_manager();
+  connection_manager() noexcept = default;
 
-  /// Add the specified connection to the manager and start it.
-  void start(connection_ptr c);
+  connection_manager(connection_manager&& rhs) noexcept = default;
+  connection_manager& operator=(connection_manager&& rhs) noexcept = default;
 
-  /// Stop the specified connection.
-  void stop(connection_ptr c);
+  ~connection_manager() noexcept = default;
 
-  /// Stop all connections.
-  void stop_all();
-
-private:
-  /// The managed connections.
-  std::set<connection_ptr> connections_;
+  void start(connection_ptr c) noexcept;
+  void stop(connection_ptr c) noexcept;
+  void stop_all() noexcept;
 };
 
 } // namespace http::server
 
 #endif // HTTP_CONNECTION_MANAGER_HPP
+

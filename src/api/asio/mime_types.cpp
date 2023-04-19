@@ -1,19 +1,20 @@
-//
-// mime_types.cpp
-// ~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
+
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
 #include "mime_types.hpp"
+#include "config/types.hpp"
+#include <cstring>
 
-namespace http::server {
-namespace mime_types {
+namespace http::server::mime_types {
 
-struct mapping {
+struct mapping { // NOLINT
   const char* extension;
   const char* mime_type;
 } mappings[] = {
@@ -23,7 +24,7 @@ struct mapping {
     {"jpg", "image/jpeg"},
     {"png", "image/png"}};
 
-std::string extension_to_type(const std::string& extension) {
+const char* extension_to_type(const types::string& extension) {
   for (mapping m : mappings) {
     if (m.extension == extension) {
       return m.mime_type;
@@ -33,5 +34,14 @@ std::string extension_to_type(const std::string& extension) {
   return "text/plain";
 }
 
-} // namespace mime_types
-} // namespace http::server
+const char* extension_to_type(const char* extension) {
+  for (mapping m : mappings) {
+    if (strcmp(m.extension, extension) == 0) {
+      return m.mime_type;
+    }
+  }
+
+  return "text/plain";
+}
+
+} // namespace http::server::mime_types

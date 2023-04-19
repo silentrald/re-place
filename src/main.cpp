@@ -13,13 +13,13 @@
 
 int main(int argc, char* argv[]) {
   try {
-    // Initialise the server.
-    http::server::server s("127.0.0.1", "5000");
+    // This can throw an error
+    http::server::server srvr{};
 
-    s.add_route(api::get_auth_login());
+    srvr.init("127.0.0.1", "5000");
+    srvr.add_route(api::get_auth_login());
 
-    // Run the server until stopped.
-    s.run();
+    srvr.run();
   } catch (std::exception& e) {
     std::cerr << "exception: " << e.what() << "\n";
   }

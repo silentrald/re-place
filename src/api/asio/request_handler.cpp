@@ -1,33 +1,37 @@
-//
-// request_handler.cpp
-// ~~~~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
+
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
 #include "request_handler.hpp"
 #include "api/asio/router.hpp"
+#include "config/types.hpp"
+#include "ds/macro.hpp"
 #include "mime_types.hpp"
-#include "reply.hpp"
 #include "request.hpp"
+#include "response.hpp"
 #include <fstream>
+#include <iostream>
 #include <sstream>
-#include <string>
+#include <utility>
 
 namespace http::server {
 
-void request_handler::add_route(const router& route) {
-  this->routers.emplace_back(route);
+types::opt_err request_handler::add_route(router&& route) noexcept {
+  if (this->routers.push_back(std::forward<router&&>(route))) {
+    return types::error{"Could not add route", def_err_vals};
+  }
+  return types::null;
 }
 
-void request_handler::add_route(router&& router) {
-  this->routers.emplace_back(std::move(router));
-}
-
-void request_handler::handle_request(const request& req, reply& rep) {
+void request_handler::handle_request(
+    const request& req, response& rep
+) noexcept {
   // NOTE: Simple implementation, no dynamic pathing
   for (const auto& r : this->routers) {
     if (req.uri == r.path) {
@@ -36,33 +40,8 @@ void request_handler::handle_request(const request& req, reply& rep) {
     }
   }
 
-  rep = reply::stock_reply(reply::not_found);
-}
-
-bool request_handler::url_decode(const std::string& in, std::string& out) {
-  out.clear();
-  out.reserve(in.size());
-  for (std::size_t i = 0; i < in.size(); ++i) {
-    if (in[i] == '%') {
-      if (i + 3 <= in.size()) {
-        int value = 0;
-        std::istringstream is(in.substr(i + 1, 2));
-        if (is >> std::hex >> value) {
-          out += static_cast<char>(value);
-          i += 2;
-        } else {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else if (in[i] == '+') {
-      out += ' ';
-    } else {
-      out += in[i];
-    }
-  }
-  return true;
+  // TODO: Log here
+  rep = response::stock_response(response::not_found);
 }
 
 } // namespace http::server

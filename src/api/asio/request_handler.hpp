@@ -1,46 +1,45 @@
-//
-// request_handler.hpp
-// ~~~~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
 
-#ifndef HTTP_REQUEST_HANDLER_HPP
-#define HTTP_REQUEST_HANDLER_HPP
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
+
+#ifndef API_ASIO_REQUEST_HANDLER_HPP
+#define API_ASIO_REQUEST_HANDLER_HPP
 
 #include "./router.hpp"
-#include <string>
-#include <vector>
+#include "config/types.hpp"
 
 namespace http::server {
 
-struct reply;
+struct response;
 struct request;
 
-/// The common handler for all incoming requests.
 class request_handler {
-public:
-  request_handler(const request_handler&) = delete;
-  request_handler& operator=(const request_handler&) = delete;
-
-  /// Construct with a directory containing files to be served.
-  request_handler() noexcept = default;
-
-  void add_route(const router& route);
-  void add_route(router&& route);
-
-  /// Handle a request and produce a reply.
-  void handle_request(const request& req, reply& rep);
-
 private:
-  /// Perform URL-decoding on a string. Returns false if the encoding was
-  /// invalid.
-  static bool url_decode(const std::string& in, std::string& out);
+  types::string base{};
+  types::vector<router> routers{};
 
-  std::vector<router> routers{};
+public:
+  request_handler(const request_handler&) noexcept = delete;
+  request_handler& operator=(const request_handler&) noexcept = delete;
+
+  request_handler() noexcept = default;
+  request_handler(request_handler&& rhs) noexcept = default;
+  request_handler& operator=(request_handler&& rhs) noexcept = default;
+  ~request_handler() noexcept = default;
+
+  // === Functions === //
+  types::opt_err set_base_path(const types::string& base) noexcept;
+  types::opt_err set_base_path(const char* base) noexcept;
+
+  types::opt_err add_route(router&& route) noexcept;
+
+  void handle_request(const request& req, response& rep) noexcept;
 };
 
 } // namespace http::server

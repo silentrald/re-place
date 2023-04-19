@@ -1,62 +1,56 @@
-//
-// server.hpp
-// ~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
 
-#ifndef HTTP_SERVER_HPP
-#define HTTP_SERVER_HPP
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
-#include "router.hpp"
+#ifndef API_ASIO_SERVER_HPP
+#define API_ASIO_SERVER_HPP
+
+#include "config/types.hpp"
 #include "connection.hpp"
 #include "connection_manager.hpp"
 #include "request_handler.hpp"
+#include "router.hpp"
 #include <asio.hpp>
-#include <string>
 
 namespace http::server {
 
 /// The top-level class of the HTTP server.
 class server {
+private:
+  asio::io_context io_cxt{1};
+  asio::signal_set signals{this->io_cxt};
+  asio::ip::tcp::acceptor acceptor{this->io_cxt};
+  connection_manager conn_manager{};
+  request_handler req_handler{};
+
+  void do_accept() noexcept;
+  void do_await_stop() noexcept;
+
 public:
-  server(const server&) = delete;
-  server& operator=(const server&) = delete;
+  server() noexcept = default;
+  server(const server&) noexcept = delete;
+  server& operator=(const server&) noexcept = delete;
 
-  /// Construct the server to listen on the specified TCP address and port, and
-  /// serve up files from the given directory.
-  explicit server(const std::string& address, const std::string& port);
+  server(server&& rhs) noexcept = default;
+  server& operator=(server&& rhs) noexcept = default;
 
-  void add_route(const router& route);
+  ~server() noexcept = default;
+
+  // === Constructors === //
+
+  types::opt_err init(const char* host, const char* port) noexcept;
+
+  // === Functions === //
+
   void add_route(router&& route) noexcept;
 
-  /// Run the server's io_context loop.
-  void run();
-
-private:
-  /// Perform an asynchronous accept operation.
-  void do_accept();
-
-  /// Wait for a request to stop the server.
-  void do_await_stop();
-
-  /// The io_context used to perform asynchronous operations.
-  asio::io_context io_context_;
-
-  /// The signal_set is used to register for process termination notifications.
-  asio::signal_set signals_;
-
-  /// Acceptor used to listen for incoming connections.
-  asio::ip::tcp::acceptor acceptor_;
-
-  /// The connection manager which owns all live connections.
-  connection_manager connection_manager_;
-
-  /// The handler for all incoming requests.
-  request_handler request_handler_;
+  types::opt_err run() noexcept;
 };
 
 } // namespace http::server

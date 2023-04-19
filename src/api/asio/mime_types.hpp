@@ -1,22 +1,22 @@
-//
-// mime_types.hpp
-// ~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2023 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/*============================*
+ * Author/s:
+ *  - silentrald
+ * Version: 1.0
+ * Created: 2023-04-19
+ *============================*/
 
-#ifndef HTTP_MIME_TYPES_HPP
-#define HTTP_MIME_TYPES_HPP
+// See:
+// https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
-#include <string>
+#ifndef API_ASIO_MIME_TYPES_HPP
+#define API_ASIO_MIME_TYPES_HPP
+
+#include "config/types.hpp"
 
 namespace http::server::mime_types {
 
-/// Convert a file extension into a MIME type.
-std::string extension_to_type(const std::string& extension);
+const char* extension_to_type(const types::string& extension);
+const char* extension_to_type(const char* extension);
 
 } // namespace http::server::mime_types
 

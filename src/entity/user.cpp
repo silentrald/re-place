@@ -25,7 +25,7 @@ types::err_code User::copy(const User& other) noexcept {
   try_err_code(this->username.copy(other.username));
   try_err_code(this->password.copy(other.password));
 
-  return types::ec::SUCCESS;
+  return types::SUCCESS;
 }
 
 // === Getters === //
@@ -47,7 +47,7 @@ const types::string& User::get_password() const noexcept {
 // === Id === //
 
 types::opt_err UserBuilder::set_id(const types::string& id) noexcept {
-  if (this->id.copy(id) != types::ec::SUCCESS) {
+  if (this->id.copy(id) != types::SUCCESS) {
     return types::error{"Could not copy id", def_err_vals};
   }
   return types::null;
@@ -58,7 +58,7 @@ void UserBuilder::set_id(types::string&& id) noexcept {
 }
 
 types::opt_err UserBuilder::set_id(const char* id) noexcept {
-  if (this->id.copy(id) != types::ec::SUCCESS) {
+  if (this->id.copy(id) != types::SUCCESS) {
     return types::error{"Could not copy id", def_err_vals};
   }
   return types::null;
@@ -68,7 +68,7 @@ types::opt_err UserBuilder::set_id(const char* id) noexcept {
 
 types::opt_err UserBuilder::set_username(const types::string& username
 ) noexcept {
-  if (this->username.copy(username) != types::ec::SUCCESS) {
+  if (this->username.copy(username) != types::SUCCESS) {
     return types::error{"Could not copy username", def_err_vals};
   }
   return types::null;
@@ -79,7 +79,7 @@ void UserBuilder::set_username(types::string&& username) noexcept {
 }
 
 types::opt_err UserBuilder::set_username(const char* username) noexcept {
-  if (this->username.copy(username) != types::ec::SUCCESS) {
+  if (this->username.copy(username) != types::SUCCESS) {
     return types::error{"Could not copy username", def_err_vals};
   }
   return types::null;
@@ -89,7 +89,7 @@ types::opt_err UserBuilder::set_username(const char* username) noexcept {
 
 types::opt_err UserBuilder::set_password(const types::string& password
 ) noexcept {
-  if (this->password.copy(password) != types::ec::SUCCESS) {
+  if (this->password.copy(password) != types::SUCCESS) {
     return types::error{"Could not copy password", def_err_vals};
   }
   return types::null;
@@ -100,7 +100,7 @@ void UserBuilder::set_password(types::string&& password) noexcept {
 }
 
 types::opt_err UserBuilder::set_password(const char* password) noexcept {
-  if (this->password.copy(password) != types::ec::SUCCESS) {
+  if (this->password.copy(password) != types::SUCCESS) {
     return types::error{"Could not copy password", def_err_vals};
   }
   return types::null;

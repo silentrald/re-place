@@ -2,7 +2,7 @@
 #ifndef API_AUTH_HPP
 #define API_AUTH_HPP
 
-#include "api/asio/reply.hpp"
+#include "api/asio/response.hpp"
 #include "api/asio/request.hpp"
 #include "api/asio/router.hpp"
 #include "ds/types.hpp"
