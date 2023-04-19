@@ -12,6 +12,7 @@
 #define API_ASIO_CONNECTION_HPP
 
 #include "asio.hpp"
+#include "config/types.hpp"
 #include "llhttp.h"
 #include "request.hpp"
 #include "request_handler.hpp"
@@ -22,6 +23,11 @@
 namespace http::server {
 
 class connection_manager;
+
+struct req_data {
+  types::string tmp{};
+  request* req = nullptr;
+};
 
 /// Represents a single connection from a client.
 class connection : public std::enable_shared_from_this<connection> {
@@ -35,6 +41,7 @@ private:
   llhttp_t parser{};
   llhttp_settings_t settings{};
 
+  req_data data{};
   request req{};
   response res{};
 

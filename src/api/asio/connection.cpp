@@ -31,48 +31,52 @@ connection::connection(
 )
     : socket(std::move(socket)), conn_manager(manager), req_handler(handler) {
   llhttp_settings_init(&this->settings);
-  this->settings.on_url = [](llhttp_t* parser, const char* at,
-                             unsigned long length) -> int {
-    return ((request*)parser->data)->uri.copy(at, length) == types::SUCCESS
+
+  auto append_tmp = [](llhttp_t* parser, const char* at,
+                       unsigned long length) -> int {
+    return ((req_data*)parser->data)->tmp.append(at, length) == types::SUCCESS
                ? HPE_OK
                : HPE_USER;
   };
+  this->settings.on_url = append_tmp;
+  this->settings.on_header_field = append_tmp;
+  this->settings.on_header_value = append_tmp;
 
-  this->settings.on_header_field = [](llhttp_t* parser, const char* at,
-                                      unsigned long length) -> int {
+  this->settings.on_url_complete = [](llhttp_t* parser) -> int {
+    auto* data = (req_data*)parser->data;
+    data->req->uri = std::move(data->tmp);
+    return HPE_OK;
+  };
+
+  this->settings.on_header_field_complete = [](llhttp_t* parser) -> int {
+    auto* data = (req_data*)parser->data;
+
     header h{};
-    types::err_code ec = h.name.copy(at, length);
-    if (ec != types::SUCCESS) {
-      return HPE_USER;
-    }
-
+    h.name = std::move(data->tmp);
     for (int i = 0; i < h.name.size(); ++i) {
       h.name[i] = std::tolower(h.name[i]);
     }
-
-    return ((request*)parser->data)->headers.push_back(std::move(h)) ==
-                   types::SUCCESS
-               ? HPE_OK
-               : HPE_USER;
+    return data->req->headers.push_back(std::move(h)) == types::SUCCESS ? HPE_OK
+                                                             : HPE_USER;
   };
 
-  this->settings.on_header_value = [](llhttp_t* parser, const char* at,
-                                      unsigned long length) -> int {
-    return ((request*)parser->data)
-                       ->headers.back_unsafe()
-                       .value.copy(at, length) == types::SUCCESS
-               ? HPE_OK
-               : HPE_USER;
+  this->settings.on_header_value_complete = [](llhttp_t* parser) -> int {
+    auto* data = (req_data*)parser->data;
+    data->req->headers.back_unsafe().value = std::move(data->tmp);
+    return HPE_OK;
   };
 
   this->settings.on_body = [](llhttp_t* parser, const char* at,
                               unsigned long length) -> int {
-    return ((request*)parser->data)->body.copy(at, length) == types::SUCCESS
+    return ((req_data*)parser->data)->req->body.append(at, length) ==
+                   types::SUCCESS
                ? HPE_OK
                : HPE_USER;
   };
   llhttp_init(&this->parser, HTTP_REQUEST, &this->settings);
-  this->parser.data = &this->req;
+
+  this->data.req = &this->req;
+  this->parser.data = &this->data;
 }
 
 void connection::start() {
