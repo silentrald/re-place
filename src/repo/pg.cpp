@@ -14,6 +14,8 @@
 
 namespace repo {
 
+// === PgManager === //
+
 types::opt_err PgManager::init(
     const char* user, const char* pass, const char* db, const char* host,
     const char* port
@@ -42,6 +44,30 @@ types::exp_err<types::shared_ptr<PgClient>> PgManager::get_client() noexcept {
         def_err_vals}};
   }
   return client;
+}
+
+// === PgClient === //
+
+PgClient::PgClient(PgClient&& rhs) noexcept : conn(rhs.conn) {
+  rhs.conn = nullptr;
+}
+
+PgClient& PgClient::operator=(PgClient&& rhs) noexcept {
+  if (&rhs == this) {
+    return *this;
+  }
+
+  this->conn = rhs.conn;
+  rhs.conn = nullptr;
+
+  return *this;
+}
+
+PgClient::~PgClient() noexcept {
+  if (this->conn) {
+    PQfinish(this->conn);
+    this->conn = nullptr;
+  }
 }
 
 types::opt_err PgClient::prepare(
@@ -85,6 +111,46 @@ types::exp_err<PgResult> PgClient::execute(
 
   res.size = PQntuples(res.result);
   return res;
+}
+
+// === PgResult === //
+
+PgResult::PgResult(PgResult&& rhs) noexcept
+    : result(rhs.result), cursor(rhs.cursor), size(rhs.size) {
+  rhs.result = nullptr;
+}
+
+PgResult& PgResult::operator=(PgResult&& rhs) noexcept {
+  if (&rhs == this) {
+    return *this;
+  }
+
+  this->result = rhs.result;
+  this->cursor = rhs.cursor;
+  this->size = rhs.size;
+
+  rhs.result = nullptr;
+
+  return *this;
+}
+
+PgResult::~PgResult() noexcept {
+  if (this->result) {
+    PQclear(this->result);
+    this->result = nullptr;
+  }
+}
+
+types::i32 PgResult::count() const noexcept {
+  return this->size;
+}
+
+char* PgResult::get(types::i32 index) noexcept {
+  return PQgetvalue(this->result, this->cursor, index);
+}
+
+bool PgResult::next() noexcept {
+  return ++this->cursor < this->size;
 }
 
 } // namespace repo

@@ -10,6 +10,7 @@
 
 #include "./request.hpp"
 #include "./response.hpp"
+#include "config/types.hpp"
 #include <string>
 
 namespace http::server {
@@ -17,7 +18,8 @@ namespace http::server {
 struct router { // NOLINT
   int method = -1;
   const char* path = nullptr;
-  void (*endpoint)(const request& req, response& rep);
+  types::function<void(const http::server::request&, http::server::response&)>
+      endpoint{};
 };
 
 } // namespace http::server

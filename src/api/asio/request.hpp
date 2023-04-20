@@ -47,17 +47,8 @@ public:
     }
   }
 
-  types::exp_err<types::string> get_parameter(const char* param) const {
-    types::string str{};
-    auto ec = str.copy(
-        this->parameters[param].GetString(),
-        this->parameters[param].GetStringLength()
-    );
-    if (ec != types::SUCCESS) {
-      return types::unexp_err{
-          types::error{"Could not get param", def_err_vals}};
-    }
-    return str;
+  const char* get_parameter(const char* param) const {
+    return this->parameters[param].GetString();
   }
 };
 

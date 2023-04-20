@@ -65,27 +65,9 @@ public:
   PgClient(const PgClient&) noexcept = delete;
   PgClient& operator=(const PgClient&) noexcept = delete;
 
-  PgClient(PgClient&& rhs) noexcept : conn(rhs.conn) {
-    rhs.conn = nullptr;
-  }
-
-  PgClient& operator=(PgClient&& rhs) noexcept {
-    if (&rhs == this) {
-      return *this;
-    }
-
-    this->conn = rhs.conn;
-    rhs.conn = nullptr;
-
-    return *this;
-  }
-
-  ~PgClient() noexcept {
-    if (this->conn) {
-      PQfinish(this->conn);
-      this->conn = nullptr;
-    }
-  }
+  PgClient(PgClient&& rhs) noexcept;
+  PgClient& operator=(PgClient&& rhs) noexcept;
+  ~PgClient() noexcept;
 
   [[nodiscard]] types::opt_err
   prepare(const char* id, const char* query, types::i32 params) noexcept;
@@ -107,44 +89,15 @@ public:
   PgResult(const PgResult&) noexcept = delete;
   PgResult& operator=(const PgResult&) noexcept = delete;
 
-  PgResult(PgResult&& rhs) noexcept
-      : result(rhs.result), cursor(rhs.cursor), size(rhs.size) {
-    rhs.result = nullptr;
-  }
+  PgResult(PgResult&& rhs) noexcept;
+  PgResult& operator=(PgResult&& rhs) noexcept;
+  ~PgResult() noexcept;
 
-  PgResult& operator=(PgResult&& rhs) noexcept {
-    if (&rhs == this) {
-      return *this;
-    }
-
-    this->result = rhs.result;
-    this->cursor = rhs.cursor;
-    this->size = rhs.size;
-
-    rhs.result = nullptr;
-
-    return *this;
-  }
-
-  ~PgResult() noexcept {
-    if (this->result) {
-      PQclear(this->result);
-      this->result = nullptr;
-    }
-  }
-
-  [[nodiscard]] types::i32 count() const noexcept {
-    return this->size;
-  }
+  [[nodiscard]] types::i32 count() const noexcept;
 
   // TODO: Template return
-  char* get(types::i32 index) noexcept {
-    return PQgetvalue(this->result, this->cursor, index);
-  }
-
-  bool next() noexcept {
-    return ++this->cursor < this->size;
-  }
+  char* get(types::i32 index) noexcept;
+  bool next() noexcept;
 };
 
 } // namespace repo

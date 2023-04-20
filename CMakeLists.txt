@@ -16,8 +16,6 @@ add_executable(${PROJECT_NAME} src/main.cpp
   src/api/asio/response.cpp
   src/api/asio/request_handler.cpp
   src/api/asio/server.cpp
-
-  src/api/auth.cpp
 )
 include_directories(src)
 

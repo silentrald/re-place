@@ -12,6 +12,8 @@
 #include "api/asio/header.hpp"
 #include "api/asio/request.hpp"
 #include "api/asio/response.hpp"
+#include "asio/buffer.hpp"
+#include "asio/write.hpp"
 #include "config/types.hpp"
 #include "connection_manager.hpp"
 #include "ds/types.hpp"

@@ -40,6 +40,10 @@ struct response {
   types::vector<header> headers;
   types::string content;
 
+private:
+  types::string content_length{};
+
+public:
   std::vector<asio::const_buffer> to_buffers();
 
   static response stock_response(status_type status);

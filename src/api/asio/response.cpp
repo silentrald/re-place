@@ -12,6 +12,7 @@
 #include "asio/buffer.hpp"
 #include "config/types.hpp"
 #include <cstring>
+#include <string>
 
 namespace http::server {
 
@@ -99,18 +100,32 @@ const char crlf[] = {'\r', '\n'};               // NOLINT
 
 } // namespace misc_strings
 
+// TODO: Look into this if it's possible to write the buffers directly than
+// storing them in a vector
 std::vector<asio::const_buffer> response::to_buffers() {
   std::vector<asio::const_buffer> buffers;
   buffers.push_back(status_strings::to_buffer(status));
-  for (std::size_t i = 0; i < headers.size(); ++i) {
+  for (std::size_t i = 0; i < this->headers.size(); ++i) {
     header& h = headers[i];
     buffers.push_back(asio::buffer(h.name.c_str(), h.name.size()));
     buffers.push_back(asio::buffer(misc_strings::name_value_separator));
     buffers.push_back(asio::buffer(h.value.c_str(), h.value.size()));
     buffers.push_back(asio::buffer(misc_strings::crlf));
   }
+
+  // Add the Content Length
+  buffers.push_back(asio::buffer("Content-Length", sizeof "Content-Length" - 1)
+  );
+  buffers.push_back(asio::buffer(misc_strings::name_value_separator));
+  auto ec =
+      this->content_length.copy(std::to_string(this->content.size()).c_str());
+  buffers.push_back(
+      asio::buffer(this->content_length.c_str(), this->content_length.size())
+  );
   buffers.push_back(asio::buffer(misc_strings::crlf));
-  buffers.push_back(asio::buffer(content.c_str(), content.size()));
+
+  buffers.push_back(asio::buffer(misc_strings::crlf));
+  buffers.push_back(asio::buffer(this->content.c_str(), this->content.size()));
   return buffers;
 }
 

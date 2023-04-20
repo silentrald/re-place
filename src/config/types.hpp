@@ -17,6 +17,7 @@
 #include "ds/unique_ptr.hpp"
 #include "ds/vector.hpp"
 #include <cstdint>
+#include <functional>
 #include <set>
 
 namespace types {
@@ -45,6 +46,8 @@ template <typename T> using shared_ptr = ds::shared_ptr<T>;
 template <typename T> using set = std::set<T>;
 
 const auto null = ds::null;
+
+template <typename Signature> using function = std::function<Signature>;
 
 // Error Handling
 using err_code = ds::err_code;

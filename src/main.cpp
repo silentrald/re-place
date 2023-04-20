@@ -12,13 +12,26 @@
 #include <cstring>
 #include <iostream>
 
+const char* const USER = "sample_user";
+const char* const PASS = "password";
+const char* const DB = "sample_db";
+const char* const HOST = "127.0.0.1";
+const char* const PORT = "5432";
+
 int main(int argc, char* argv[]) {
+  // Declare variables here
+  repo::PgManager repo{};
+  repo.init(USER, PASS, DB, HOST, PORT);
+  repo::UserPg user_repo{&repo};
+  use_case::auth::Login<repo::UserPg> login_uc{&user_repo};
+
   try {
     // This can throw an error
     http::server::server srvr{};
 
     srvr.init("127.0.0.1", "5000");
-    srvr.add_route(api::get_auth_login());
+
+    srvr.add_route(api::get_auth_login(&login_uc));
 
     printf("Running: http://127.0.0.1:5000\n");
     srvr.run();

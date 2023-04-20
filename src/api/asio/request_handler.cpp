@@ -15,8 +15,8 @@
 #include "mime_types.hpp"
 #include "request.hpp"
 #include "response.hpp"
+#include <cstdio>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <utility>
 
@@ -32,6 +32,8 @@ types::opt_err request_handler::add_route(router&& route) noexcept {
 void request_handler::handle_request(
     const request& req, response& rep
 ) noexcept {
+  printf("GET %s\n", req.uri.c_str()); // TODO: Logger
+
   // NOTE: Simple implementation, no dynamic pathing
   for (const auto& r : this->routers) {
     if (req.uri == r.path) {
