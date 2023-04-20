@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 add_executable(${PROJECT_NAME} src/main.cpp
   src/entity/user.cpp
 
+  src/repo/pg.cpp
   src/repo/pg/user.cpp
 
   src/api/asio/connection.cpp
@@ -29,6 +30,6 @@ add_subdirectory(external/llhttp)
 include_directories(external/llhttp/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ds llhttp_shared 
+  ds llhttp_shared pq
 )
 

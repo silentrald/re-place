@@ -13,21 +13,40 @@
 
 namespace repo {
 
+const char* const GUBU_ID = "gubu";
+const char* const GUBU_QRY = "SELECT id, username, password\n"
+                             "FROM users\n"
+                             "WHERE username = $1\n"
+                             "LIMIT 1;";
+const types::i32 GUBU_PARAMS = 1;
+const types::i32 GUBU_F_ID = 0;
+const types::i32 GUBU_F_USERNAME = 1;
+const types::i32 GUBU_F_PASSWORD = 2;
+
 types::exp_err<entity::User>
 UserPg::get_user_by_username_impl(const types::string& username) noexcept {
-  entity::UserBuilder builder{};
-  try_opt_unexp(builder.set_id("id"));
-  try_opt_unexp(builder.set_username(username));
-  try_opt_unexp(builder.set_password("password"));
-  return builder.build();
+  return this->get_user_by_username_impl(username.c_str());
 }
 
 types::exp_err<entity::User>
 UserPg::get_user_by_username_impl(const char* username) noexcept {
+  types::vector<types::string> values{};
+  auto ec = values.push_back(username);
+  if (ec != types::SUCCESS) {
+    return types::unexp_err{types::error{"Bad Allocation", def_err_vals}};
+  }
+
+  auto client = try_exp_unexp(this->repo->get_client());
+  try_opt_unexp(client->prepare(GUBU_ID, GUBU_QRY, GUBU_PARAMS));
+  auto res = try_exp_unexp(client->execute(GUBU_ID, values));
+  if (res.count() == 0) {
+    return types::unexp_err{types::error{"User does not exist", def_err_vals}};
+  }
+
   entity::UserBuilder builder{};
-  try_opt_unexp(builder.set_id("id"));
-  try_opt_unexp(builder.set_username(username));
-  try_opt_unexp(builder.set_password("password"));
+  try_opt_unexp(builder.set_id(res.get(GUBU_F_ID)));
+  try_opt_unexp(builder.set_username(res.get(GUBU_F_USERNAME)));
+  try_opt_unexp(builder.set_password(res.get(GUBU_F_PASSWORD)));
   return builder.build();
 }
 

@@ -12,8 +12,11 @@
 #define API_ASIO_REQUEST_HPP
 
 #include "config/types.hpp"
+#include "ds/macro.hpp"
+#include "ds/types.hpp"
 #include "header.hpp"
 #include "rapidjson/document.h"
+#include <iostream>
 
 using json = rapidjson::Document;
 
@@ -44,9 +47,17 @@ public:
     }
   }
 
-  // TODO: Use partial declaration
-  template <typename T> T get_parameter(const char* param) const {
-    return this->parameters[param].GetString();
+  types::exp_err<types::string> get_parameter(const char* param) const {
+    types::string str{};
+    auto ec = str.copy(
+        this->parameters[param].GetString(),
+        this->parameters[param].GetStringLength()
+    );
+    if (ec != types::SUCCESS) {
+      return types::unexp_err{
+          types::error{"Could not get param", def_err_vals}};
+    }
+    return str;
   }
 };
 

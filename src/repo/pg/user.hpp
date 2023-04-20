@@ -10,14 +10,17 @@
 
 #include "config/types.hpp"
 #include "entity/user.hpp"
+#include "repo/pg.hpp"
 #include "repo/user.hpp"
 
 namespace repo {
 
 class UserPg : public User<UserPg> {
 private:
+  PgManager* repo = nullptr;
+
 public:
-  UserPg() noexcept = default;
+  UserPg(PgManager* repo) noexcept : repo(repo) {} // NOLINT
   UserPg(const UserPg&) noexcept = delete;
   UserPg& operator=(const UserPg&) noexcept = delete;
 

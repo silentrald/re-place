@@ -9,6 +9,12 @@
 
 namespace api {
 
+const char* const USER = "sample_user";
+const char* const PASS = "password";
+const char* const DB = "sample_db";
+const char* const HOST = "127.0.0.1";
+const char* const PORT = "5432";
+
 http::server::router get_auth_login() {
   return http::server::router{
       .method = HTTP_GET,
@@ -16,17 +22,19 @@ http::server::router get_auth_login() {
       // TODO: Edit this to pass scoped variables
       .endpoint = [](const http::server::request& req,
                      http::server::response& rep) {
+        printf("GET /api/login\n");
+
+        // TODO: Another wrapper for this
         types::err_code ec{};
-        repo::UserPg user_repo{};
+        repo::PgManager repo{};
+        repo.init(USER, PASS, DB, HOST, PORT);
+        repo::UserPg user_repo{&repo};
         use_case::auth::Login<repo::UserPg> login_uc{&user_repo};
 
-        const char* username_ptr = req.get_parameter<const char*>("username");
-        const char* password_ptr = req.get_parameter<const char*>("password");
-
-        types::string username{};
-        types::string password{};
-        ec = username.copy(username_ptr);
-        ec = password.copy(password_ptr);
+        types::string username =
+            std::move(req.get_parameter("username").value());
+        types::string password =
+            std::move(req.get_parameter("password").value());
 
         auto err = login_uc.execute(username, password);
         if (!err) {
@@ -34,6 +42,10 @@ http::server::router get_auth_login() {
           ec = rep.content.copy("Logged In");
         } else {
           rep.status = http::server::response::status_type::unauthorized;
+          printf(
+              "Msg: %s\n> %s:%d\n", err->get_msg(), err->get_def_file(),
+              err->get_def_line()
+          );
           ec = rep.content.copy("Auth Failed");
         }
         ec = rep.headers.resize(1);

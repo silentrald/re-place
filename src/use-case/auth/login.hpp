@@ -12,7 +12,6 @@
 #include "ds-error/error.hpp"
 #include "ds/macro.hpp"
 #include "repo/user.hpp"
-#include <iostream>
 
 namespace use_case::auth {
 

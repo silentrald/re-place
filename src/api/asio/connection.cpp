@@ -19,9 +19,8 @@
 #include "request_handler.hpp"
 #include <algorithm>
 #include <cctype>
-#include <iostream>
+#include <cstdio>
 #include <utility>
-#include <vector>
 
 namespace http::server {
 
@@ -56,8 +55,9 @@ connection::connection(
     for (int i = 0; i < h.name.size(); ++i) {
       h.name[i] = std::tolower(h.name[i]);
     }
-    return data->req->headers.push_back(std::move(h)) == types::SUCCESS ? HPE_OK
-                                                             : HPE_USER;
+    return data->req->headers.push_back(std::move(h)) == types::SUCCESS
+               ? HPE_OK
+               : HPE_USER;
   };
 
   this->settings.on_header_value_complete = [](llhttp_t* parser) -> int {
@@ -105,6 +105,7 @@ void connection::do_read() noexcept {
           if (this->parser.finish == 0) {
             this->req.method = this->parser.method;
             this->req.finish();
+            llhttp_finish(&this->parser);
 
             this->req_handler.handle_request(this->req, this->res);
             this->do_write();

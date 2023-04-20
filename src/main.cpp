@@ -8,6 +8,7 @@
 #include "llhttp.h"
 #include "repo/pg/user.hpp"
 #include "use-case/auth/login.hpp"
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 
@@ -19,6 +20,7 @@ int main(int argc, char* argv[]) {
     srvr.init("127.0.0.1", "5000");
     srvr.add_route(api::get_auth_login());
 
+    printf("Running: http://127.0.0.1:5000\n");
     srvr.run();
   } catch (std::exception& e) {
     std::cerr << "exception: " << e.what() << "\n";
