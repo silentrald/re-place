@@ -21,8 +21,8 @@ struct request;
 
 class request_handler {
 private:
-  types::string base{};
-  types::vector<router> routers{};
+  string base{};
+  vector<router> routers{};
 
 public:
   request_handler(const request_handler&) noexcept = delete;
@@ -34,10 +34,10 @@ public:
   ~request_handler() noexcept = default;
 
   // === Functions === //
-  types::opt_err set_base_path(const types::string& base) noexcept;
-  types::opt_err set_base_path(const char* base) noexcept;
+  opt_err set_base_path(const string& base) noexcept;
+  opt_err set_base_path(const char* base) noexcept;
 
-  types::opt_err add_route(router&& route) noexcept;
+  opt_err add_route(router&& route) noexcept;
 
   void handle_request(const request& req, response& rep) noexcept;
 };

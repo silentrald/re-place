@@ -16,7 +16,7 @@ namespace repo {
 
 // === PgManager === //
 
-types::opt_err PgManager::init(
+opt_err PgManager::init(
     const char* user, const char* pass, const char* db, const char* host,
     const char* port
 ) noexcept {
@@ -25,23 +25,21 @@ types::opt_err PgManager::init(
   err = this->db.copy(db);
   err = this->host.copy(host);
   err = this->port.copy(port);
-  return types::null;
+  return null;
 }
 
-types::exp_err<types::shared_ptr<PgClient>> PgManager::get_client() noexcept {
-  types::shared_ptr<PgClient> client{};
+exp_err<shared_ptr<PgClient>> PgManager::get_client() noexcept {
+  shared_ptr<PgClient> client{};
   // TODO: Add pooling here
-  if (client.init() != types::SUCCESS) {
-    return types::unexp_err{types::error{"Bad Allocation", def_err_vals}};
-  }
+  try_opt_unexp(client.init());
   client->conn = PQsetdbLogin(
       this->host.c_str(), this->port.c_str(), nullptr, nullptr,
       this->db.c_str(), this->user.c_str(), this->pass.c_str()
   );
   if (PQstatus(client->conn) != CONNECTION_OK) {
-    return types::unexp_err{types::error{
-        PQerrorMessage(client->conn), "Could not connect to the database",
-        def_err_vals}};
+    return unexp_err{error{
+        PQerrorMessage(client->conn), err::DB_CONN_ERR,
+        "Could not connect to the database", def_err_vals}};
   }
   return client;
 }
@@ -70,33 +68,29 @@ PgClient::~PgClient() noexcept {
   }
 }
 
-types::opt_err PgClient::prepare(
-    const char* id, const char* query, types::i32 params
-) noexcept {
+opt_err
+PgClient::prepare(const char* id, const char* query, i32 params) noexcept {
   auto* result = PQprepare(this->conn, id, query, params, nullptr);
   if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-    types::error err{
-        PQresultErrorMessage(result), "Could not prepare query", def_err_vals};
+    error err{
+        PQresultErrorMessage(result), err::DB_PREPARE_ERR,
+        "Could not prepare query", def_err_vals};
     PQclear(result);
     return err;
   }
 
   PQclear(result);
-  return types::null;
+  return null;
 }
 
-types::exp_err<PgResult> PgClient::execute(
-    const char* id, types::vector<types::string>& values
-) noexcept {
-  types::vector<const char*> cvalues{};
+exp_err<PgResult>
+PgClient::execute(const char* id, vector<string>& values) noexcept {
+  vector<const char*> cvalues{};
 
-  auto ec = cvalues.reserve(values.size());
-  if (ec != types::SUCCESS) {
-    return types::unexp_err{types::error{"Bad Allocation", def_err_vals}};
-  }
+  try_opt_unexp(cvalues.reserve(values.size()));
 
   for (const auto& v : values) {
-    ec = cvalues.push_back(v.c_str());
+    static_cast<void>(cvalues.push_back(v.c_str()));
   }
 
   PgResult res{};
@@ -104,9 +98,9 @@ types::exp_err<PgResult> PgClient::execute(
       this->conn, id, values.size(), cvalues.data(), nullptr, nullptr, 0
   );
   if (PQresultStatus(res.result) != PGRES_TUPLES_OK) {
-    return types::unexp_err{types::error{
-        PQresultErrorMessage(res.result), "Could not execute query",
-        def_err_vals}};
+    return unexp_err{error{
+        PQresultErrorMessage(res.result), err::DB_EXEC_ERR,
+        "Could not execute query", def_err_vals}};
   }
 
   res.size = PQntuples(res.result);
@@ -141,11 +135,11 @@ PgResult::~PgResult() noexcept {
   }
 }
 
-types::i32 PgResult::count() const noexcept {
+i32 PgResult::count() const noexcept {
   return this->size;
 }
 
-char* PgResult::get(types::i32 index) noexcept {
+char* PgResult::get(i32 index) noexcept {
   return PQgetvalue(this->result, this->cursor, index);
 }
 

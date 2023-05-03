@@ -14,16 +14,16 @@ namespace entity {
 
 // === Consts === //
 
-const types::i32 USERNAME_MAX = 60;
-const types::i32 PASSWORD_MAX = 60;
+const i32 USERNAME_MAX = 60;
+const i32 PASSWORD_MAX = 60;
 
 class UserBuilder;
 
 class User {
 private:
-  types::string id{};
-  types::string username{};
-  types::string password{};
+  string id{};
+  string username{};
+  string password{};
 
 public:
   friend UserBuilder;
@@ -34,7 +34,7 @@ public:
   User(const User&) = delete;
   User& operator=(const User&) = delete;
 
-  [[nodiscard]] types::err_code copy(const User& other) noexcept;
+  [[nodiscard]] opt_err copy(const User& other) noexcept;
 
   User(User&& rhs) noexcept = default;
   User& operator=(User&& rhs) noexcept = default;
@@ -43,16 +43,16 @@ public:
 
   // === Getters === //
 
-  [[nodiscard]] const types::string& get_id() const noexcept;
-  [[nodiscard]] const types::string& get_username() const noexcept;
-  [[nodiscard]] const types::string& get_password() const noexcept;
+  [[nodiscard]] const string& get_id() const noexcept;
+  [[nodiscard]] const string& get_username() const noexcept;
+  [[nodiscard]] const string& get_password() const noexcept;
 };
 
 class UserBuilder {
 private:
-  types::string id{};
-  types::string username{};
-  types::string password{};
+  string id{};
+  string username{};
+  string password{};
 
 public:
   // === Constructor === //
@@ -68,25 +68,23 @@ public:
 
   // === Id === //
 
-  [[nodiscard]] types::opt_err set_id(const types::string& id) noexcept;
-  void set_id(types::string&& id) noexcept;
-  [[nodiscard]] types::opt_err set_id(const char* id) noexcept;
+  [[nodiscard]] opt_err set_id(const string& id) noexcept;
+  void set_id(string&& id) noexcept;
+  [[nodiscard]] opt_err set_id(const char* id) noexcept;
 
   // === Username === //
 
-  [[nodiscard]] types::opt_err set_username(const types::string& username
-  ) noexcept;
-  void set_username(types::string&& username) noexcept;
-  [[nodiscard]] types::opt_err set_username(const char* username) noexcept;
+  [[nodiscard]] opt_err set_username(const string& username) noexcept;
+  void set_username(string&& username) noexcept;
+  [[nodiscard]] opt_err set_username(const char* username) noexcept;
 
   // === Password === //
 
-  [[nodiscard]] types::opt_err set_password(const types::string& password
-  ) noexcept;
-  void set_password(types::string&& password) noexcept;
-  [[nodiscard]] types::opt_err set_password(const char* password) noexcept;
+  [[nodiscard]] opt_err set_password(const string& password) noexcept;
+  void set_password(string&& password) noexcept;
+  [[nodiscard]] opt_err set_password(const char* password) noexcept;
 
-  [[nodiscard]] types::exp_err<User> build() noexcept;
+  [[nodiscard]] exp_err<User> build() noexcept;
 };
 
 } // namespace entity

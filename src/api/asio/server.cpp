@@ -17,7 +17,7 @@
 
 namespace http::server {
 
-types::opt_err server::init(const char* host, const char* port) noexcept {
+opt_err server::init(const char* host, const char* port) noexcept {
   try {
     signals.add(SIGINT);
     signals.add(SIGTERM);
@@ -36,9 +36,9 @@ types::opt_err server::init(const char* host, const char* port) noexcept {
 
     do_accept();
 
-    return types::null;
+    return null;
   } catch (std::exception& err) {
-    return types::error{err.what(), def_err_vals};
+    return error{err.what(), def_err_vals};
   }
 }
 
@@ -46,12 +46,12 @@ void server::add_route(router&& route) noexcept {
   this->req_handler.add_route(std::forward<router&&>(route));
 }
 
-types::opt_err server::run() noexcept {
+opt_err server::run() noexcept {
   try {
     this->io_cxt.run();
-    return types::null;
+    return null;
   } catch (std::exception& err) {
-    return types::error{err.what(), def_err_vals};
+    return error{err.what(), def_err_vals};
   }
 }
 

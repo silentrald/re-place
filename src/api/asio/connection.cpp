@@ -35,9 +35,8 @@ connection::connection(
 
   auto append_tmp = [](llhttp_t* parser, const char* at,
                        unsigned long length) -> int {
-    return ((req_data*)parser->data)->tmp.append(at, length) == types::SUCCESS
-               ? HPE_OK
-               : HPE_USER;
+    return ((req_data*)parser->data)->tmp.append(at, length) ? HPE_USER
+                                                             : HPE_OK;
   };
   this->settings.on_url = append_tmp;
   this->settings.on_header_field = append_tmp;
@@ -57,9 +56,7 @@ connection::connection(
     for (int i = 0; i < h.name.size(); ++i) {
       h.name[i] = std::tolower(h.name[i]);
     }
-    return data->req->headers.push_back(std::move(h)) == types::SUCCESS
-               ? HPE_OK
-               : HPE_USER;
+    return data->req->headers.push_back(std::move(h)) ? HPE_USER : HPE_OK;
   };
 
   this->settings.on_header_value_complete = [](llhttp_t* parser) -> int {
@@ -70,10 +67,8 @@ connection::connection(
 
   this->settings.on_body = [](llhttp_t* parser, const char* at,
                               unsigned long length) -> int {
-    return ((req_data*)parser->data)->req->body.append(at, length) ==
-                   types::SUCCESS
-               ? HPE_OK
-               : HPE_USER;
+    return ((req_data*)parser->data)->req->body.append(at, length) ? HPE_USER
+                                                                   : HPE_OK;
   };
   llhttp_init(&this->parser, HTTP_REQUEST, &this->settings);
 

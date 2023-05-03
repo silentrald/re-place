@@ -16,8 +16,8 @@
 namespace http::server {
 
 struct header {
-  types::string name{};
-  types::string value{};
+  string name{};
+  string value{};
 };
 
 } // namespace http::server

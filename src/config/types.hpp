@@ -10,6 +10,7 @@
 
 #include "ds-error/expected.hpp"
 #include "ds-error/types.hpp"
+#include "ds-thread/mutex.hpp"
 #include "ds/optional.hpp"
 #include "ds/shared_ptr.hpp"
 #include "ds/string.hpp"
@@ -19,8 +20,6 @@
 #include <cstdint>
 #include <functional>
 #include <set>
-
-namespace types {
 
 // === Primitives === //
 using i8 = int8_t;
@@ -49,17 +48,24 @@ const auto null = ds::null;
 
 template <typename Signature> using function = std::function<Signature>;
 
-// Error Handling
-using err_code = ds::err_code;
+// Threading
+using mutex = ds::mutex;
 
+// Error Handling
 using error = ds::error;
 using opt_err = ds::opt_err;
 template <typename T> using exp_err = ds::exp_err<T>;
 using unexp_err = ds::unexpected<error>;
 
-using namespace ds::ec;
+// Error Codes
+namespace err {
 
-} // namespace types
+// DB
+const i32 DB_CONN_ERR = 100;
+const i32 DB_PREPARE_ERR = 101;
+const i32 DB_EXEC_ERR = 102;
+
+} // namespace err
 
 #endif
 

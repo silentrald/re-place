@@ -44,13 +44,13 @@ public:
 
   // === Constructors === //
 
-  types::opt_err init(const char* host, const char* port) noexcept;
+  opt_err init(const char* host, const char* port) noexcept;
 
   // === Functions === //
 
   void add_route(router&& route) noexcept;
 
-  types::opt_err run() noexcept;
+  opt_err run() noexcept;
 };
 
 } // namespace http::server

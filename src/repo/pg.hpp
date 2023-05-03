@@ -15,17 +15,17 @@ class PgResult;
 
 class PgManager {
 private:
-  types::string user{};
-  types::string pass{};
+  string user{};
+  string pass{};
 
-  types::string db{};
-  types::string host{};
-  types::string port{};
+  string db{};
+  string host{};
+  string port{};
 
-  types::i32 pool_size = 1;
+  i32 pool_size = 1;
 
-  types::vector<types::shared_ptr<PgClient>> clients{};
-  types::vector<types::shared_ptr<PgClient>> used{};
+  vector<shared_ptr<PgClient>> clients{};
+  vector<shared_ptr<PgClient>> used{};
 
 public:
   PgManager() noexcept = default;
@@ -34,11 +34,11 @@ public:
 
   // === Constructor === //
 
-  types::opt_err init(
-      const types::string& user, const types::string& pass,
-      const types::string& db, const types::string& host, types::string& port
+  opt_err init(
+      const string& user, const string& pass, const string& db,
+      const string& host, string& port
   ) noexcept;
-  types::opt_err init(
+  opt_err init(
       const char* user, const char* pass, const char* db, const char* host,
       const char* port
   ) noexcept;
@@ -50,8 +50,7 @@ public:
 
   // === Functions === //
 
-  [[nodiscard]] types::exp_err<types::shared_ptr<PgClient>>
-  get_client() noexcept;
+  [[nodiscard]] exp_err<shared_ptr<PgClient>> get_client() noexcept;
 };
 
 class PgClient {
@@ -69,18 +68,18 @@ public:
   PgClient& operator=(PgClient&& rhs) noexcept;
   ~PgClient() noexcept;
 
-  [[nodiscard]] types::opt_err
-  prepare(const char* id, const char* query, types::i32 params) noexcept;
+  [[nodiscard]] opt_err
+  prepare(const char* id, const char* query, i32 params) noexcept;
 
-  [[nodiscard]] types::exp_err<PgResult>
-  execute(const char* id, types::vector<types::string>& values) noexcept;
+  [[nodiscard]] exp_err<PgResult>
+  execute(const char* id, vector<string>& values) noexcept;
 };
 
 class PgResult {
 private:
   PGresult* result = nullptr;
-  types::i32 cursor = 0;
-  types::i32 size = 0;
+  i32 cursor = 0;
+  i32 size = 0;
 
 public:
   friend PgClient;
@@ -93,10 +92,10 @@ public:
   PgResult& operator=(PgResult&& rhs) noexcept;
   ~PgResult() noexcept;
 
-  [[nodiscard]] types::i32 count() const noexcept;
+  [[nodiscard]] i32 count() const noexcept;
 
   // TODO: Template return
-  char* get(types::i32 index) noexcept;
+  char* get(i32 index) noexcept;
   bool next() noexcept;
 };
 

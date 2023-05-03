@@ -24,18 +24,18 @@ namespace http::server {
 
 struct request {
 public:
-  types::string uri{};
-  types::string body{};
-  types::vector<header> headers{};
+  string uri{};
+  string body{};
+  vector<header> headers{};
 
 private:
   // TODO: Use union
   json parameters{};
 
 public:
-  types::u8 method = 0U;
-  types::u8 http_version_major = 0U;
-  types::u8 http_version_minor = 0U;
+  u8 method = 0U;
+  u8 http_version_major = 0U;
+  u8 http_version_minor = 0U;
 
   void finish() {
     for (const auto& h : this->headers) {

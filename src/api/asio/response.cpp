@@ -35,22 +35,22 @@ const char* not_implemented = "HTTP/1.0 501 Not Implemented\r\n";
 const char* bad_gateway = "HTTP/1.0 502 Bad Gateway\r\n";
 const char* service_unavailable = "HTTP/1.0 503 Service Unavailable\r\n";
 
-const types::u32 ok_len = strlen(ok);
-const types::u32 created_len = strlen(created);
-const types::u32 accepted_len = strlen(accepted);
-const types::u32 no_content_len = strlen(no_content);
-const types::u32 multiple_choices_len = strlen(multiple_choices);
-const types::u32 moved_permanently_len = strlen(moved_permanently);
-const types::u32 moved_temporarily_len = strlen(moved_temporarily);
-const types::u32 not_modified_len = strlen(not_modified);
-const types::u32 bad_request_len = strlen(bad_request);
-const types::u32 unauthorized_len = strlen(unauthorized);
-const types::u32 forbidden_len = strlen(forbidden);
-const types::u32 not_found_len = strlen(not_found);
-const types::u32 internal_server_error_len = strlen(internal_server_error);
-const types::u32 not_implemented_len = strlen(not_implemented);
-const types::u32 bad_gateway_len = strlen(bad_gateway);
-const types::u32 service_unavailable_len = strlen(service_unavailable);
+const u32 ok_len = strlen(ok);
+const u32 created_len = strlen(created);
+const u32 accepted_len = strlen(accepted);
+const u32 no_content_len = strlen(no_content);
+const u32 multiple_choices_len = strlen(multiple_choices);
+const u32 moved_permanently_len = strlen(moved_permanently);
+const u32 moved_temporarily_len = strlen(moved_temporarily);
+const u32 not_modified_len = strlen(not_modified);
+const u32 bad_request_len = strlen(bad_request);
+const u32 unauthorized_len = strlen(unauthorized);
+const u32 forbidden_len = strlen(forbidden);
+const u32 not_found_len = strlen(not_found);
+const u32 internal_server_error_len = strlen(internal_server_error);
+const u32 not_implemented_len = strlen(not_implemented);
+const u32 bad_gateway_len = strlen(bad_gateway);
+const u32 service_unavailable_len = strlen(service_unavailable);
 
 asio::const_buffer to_buffer(response::status_type status) {
   switch (status) {
@@ -239,13 +239,14 @@ const char* to_string(response::status_type status) {
 response response::stock_response(response::status_type status) {
   response rep;
   rep.status = status;
-  types::err_code err = rep.content.copy(stock_replies::to_string(status));
-  err = rep.headers.resize(2);
-  err = rep.headers[0].name.copy("Content-Length");
-  err = rep.headers[0].value.copy(std::to_string(rep.content.size()).c_str()
+  // TODO: Make this safe
+  rep.content.copy(stock_replies::to_string(status));
+  rep.headers.resize(2);
+  rep.headers[0].name.copy("Content-Length");
+  rep.headers[0].value.copy(std::to_string(rep.content.size()).c_str()
   ); // TODO: Converted
-  err = rep.headers[1].name.copy("Content-Type");
-  err = rep.headers[1].value.copy("text/html");
+  rep.headers[1].name.copy("Content-Type");
+  rep.headers[1].value.copy("text/html");
   return rep;
 }
 

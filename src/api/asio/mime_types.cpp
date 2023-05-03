@@ -24,7 +24,7 @@ struct mapping { // NOLINT
     {"jpg", "image/jpeg"},
     {"png", "image/png"}};
 
-const char* extension_to_type(const types::string& extension) {
+const char* extension_to_type(const string& extension) {
   for (mapping m : mappings) {
     if (m.extension == extension) {
       return m.mime_type;

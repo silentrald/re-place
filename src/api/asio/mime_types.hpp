@@ -15,7 +15,7 @@
 
 namespace http::server::mime_types {
 
-const char* extension_to_type(const types::string& extension);
+const char* extension_to_type(const string& extension);
 const char* extension_to_type(const char* extension);
 
 } // namespace http::server::mime_types

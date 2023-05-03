@@ -22,11 +22,11 @@
 
 namespace http::server {
 
-types::opt_err request_handler::add_route(router&& route) noexcept {
+opt_err request_handler::add_route(router&& route) noexcept {
   if (this->routers.push_back(std::forward<router&&>(route))) {
-    return types::error{"Could not add route", def_err_vals};
+    return error{"Could not add route", def_err_vals};
   }
-  return types::null;
+  return null;
 }
 
 void request_handler::handle_request(

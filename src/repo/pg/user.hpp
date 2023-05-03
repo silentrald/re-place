@@ -25,7 +25,7 @@ public:
   UserPg& operator=(const UserPg&) noexcept = delete;
 
   // === Constructor === //
-  types::opt_err init() noexcept;
+  opt_err init() noexcept;
 
   UserPg(UserPg&& rhs) noexcept = default;
   UserPg& operator=(UserPg&& rhs) noexcept = default;
@@ -33,12 +33,12 @@ public:
   ~UserPg() noexcept = default;
 
   // === Create === //
-  types::string add_user_impl(const entity::User& user) noexcept;
+  string add_user_impl(const entity::User& user) noexcept;
 
   // === Read === //
-  types::exp_err<entity::User>
-  get_user_by_username_impl(const types::string& username) noexcept;
-  types::exp_err<entity::User> get_user_by_username_impl(const char* username
+  exp_err<entity::User>
+  get_user_by_username_impl(const string& username) noexcept;
+  exp_err<entity::User> get_user_by_username_impl(const char* username
   ) noexcept;
 };
 

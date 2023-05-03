@@ -37,11 +37,11 @@ struct response {
     service_unavailable = 503
   } status = status_type::ok;
 
-  types::vector<header> headers;
-  types::string content;
+  vector<header> headers;
+  string content;
 
 private:
-  types::string content_length{};
+  string content_length{};
 
 public:
   std::vector<asio::const_buffer> to_buffers();

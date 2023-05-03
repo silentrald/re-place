@@ -11,6 +11,7 @@
 #include "api/asio/request.hpp"
 #include "api/asio/response.hpp"
 #include "api/asio/router.hpp"
+#include "config/logger.hpp"
 #include "ds/types.hpp"
 #include "llhttp.h"
 #include "repo/pg/user.hpp"
@@ -29,24 +30,19 @@ get_auth_login(use_case::auth::Login<AuthLoginUseCase>* login_uc) noexcept {
                       const http::server::request& req,
                       http::server::response& rep
                   ) { // TODO: Wrap this to mock
-        types::err_code ec{};
-        types::string username{};
-        types::string password{};
-        ec = username.copy(req.get_parameter("username"));
-        ec = password.copy(req.get_parameter("password"));
+        const char* username = req.get_parameter("username");
+        const char* password = req.get_parameter("password");
 
         auto err = login_uc->execute(username, password);
-        if (!err) {
-          rep.status = http::server::response::status_type::ok;
-          ec = rep.content.copy("Logged In");
-        } else {
+        if (err) {
           rep.status = http::server::response::status_type::unauthorized;
-          printf(
-              "Msg: %s\n> %s:%d\n", err->get_msg(), err->get_def_file(),
-              err->get_def_line()
-          ); // TODO: Logger
-          ec = rep.content.copy("Auth Failed");
+          logger::error(*err);
+          static_cast<void>(rep.content.copy("Auth Failed"));
+          return;
         }
+
+        rep.status = http::server::response::status_type::ok;
+        static_cast<void>(rep.content.copy("Logged In"));
       }};
 }
 

@@ -5,6 +5,8 @@ project(main VERSION 1.0.0)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 add_executable(${PROJECT_NAME} src/main.cpp
+  src/config/logger-dev.cpp # TODO: Separate the logger to a lib
+
   src/entity/user.cpp
 
   src/repo/pg.cpp
@@ -19,6 +21,7 @@ add_executable(${PROJECT_NAME} src/main.cpp
 )
 include_directories(src)
 
+set(DS_THREAD on)
 add_subdirectory(external/ds)
 include_directories(external/rapidjson/include)
 include_directories(external/ds/src)
@@ -28,6 +31,7 @@ add_subdirectory(external/llhttp)
 include_directories(external/llhttp/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ds llhttp_shared pq
+  ds ds-thread
+  llhttp_shared pq
 )
 

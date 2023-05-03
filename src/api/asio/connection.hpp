@@ -25,29 +25,13 @@ namespace http::server {
 class connection_manager;
 
 struct req_data {
-  types::string tmp{};
+  string tmp{};
   request* req = nullptr;
 };
 
+// TODO: Think of a way to not inherit enabled_shared_from_this
 /// Represents a single connection from a client.
 class connection : public std::enable_shared_from_this<connection> {
-private:
-  asio::ip::tcp::socket socket;
-
-  connection_manager& conn_manager;
-  request_handler& req_handler;
-  types::array<char, 8192> buffer{};
-
-  llhttp_t parser{};
-  llhttp_settings_t settings{};
-
-  req_data data{};
-  request req{};
-  response res{};
-
-  void do_read() noexcept;
-  void do_write() noexcept;
-
 public:
   connection(const connection&) = delete;
   connection& operator=(const connection&) = delete;
@@ -64,6 +48,23 @@ public:
 
   void start();
   void stop();
+
+private:
+  asio::ip::tcp::socket socket;
+
+  connection_manager& conn_manager;
+  request_handler& req_handler;
+  array<char, 8192> buffer{};
+
+  llhttp_t parser{};
+  llhttp_settings_t settings{};
+
+  req_data data{};
+  request req{};
+  response res{};
+
+  void do_read() noexcept;
+  void do_write() noexcept;
 };
 
 using connection_ptr = std::shared_ptr<connection>;

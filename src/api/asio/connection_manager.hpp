@@ -17,9 +17,6 @@
 namespace http::server {
 
 class connection_manager {
-private:
-  types::set<connection_ptr> connections{};
-
 public:
   connection_manager(const connection_manager&) = delete;
   connection_manager& operator=(const connection_manager&) = delete;
@@ -34,6 +31,9 @@ public:
   void start(connection_ptr c) noexcept;
   void stop(connection_ptr c) noexcept;
   void stop_all() noexcept;
+
+private:
+  set<connection_ptr> connections{};
 };
 
 } // namespace http::server

@@ -18,7 +18,7 @@ namespace http::server {
 struct router { // NOLINT
   int method = -1;
   const char* path = nullptr;
-  types::function<void(const http::server::request&, http::server::response&)>
+  function<void(const http::server::request&, http::server::response&)>
       endpoint{};
 };
 
