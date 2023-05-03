@@ -12,6 +12,7 @@
 #include "api/asio/response.hpp"
 #include "api/asio/router.hpp"
 #include "config/logger.hpp"
+#include "config/types.hpp"
 #include "ds/types.hpp"
 #include "llhttp.h"
 #include "repo/pg/user.hpp"
@@ -20,31 +21,32 @@
 
 namespace api {
 
-template <typename AuthLoginUseCase>
-http::server::router
-get_auth_login(use_case::auth::Login<AuthLoginUseCase>* login_uc) noexcept {
-  return http::server::router{
-      .method = HTTP_GET,
-      .path = "/api/login",
-      .endpoint = [login_uc](
-                      const http::server::request& req,
-                      http::server::response& rep
-                  ) { // TODO: Wrap this to mock
-        const char* username = req.get_parameter("username");
-        const char* password = req.get_parameter("password");
+template <typename UserRepo> class GetAuthLogin {
+private:
+  use_case::auth::Login<UserRepo>* use_case = nullptr;
 
-        auto err = login_uc->execute(username, password);
-        if (err) {
-          rep.status = http::server::response::status_type::unauthorized;
-          logger::error(*err);
-          static_cast<void>(rep.content.copy("Auth Failed"));
-          return;
-        }
+public:
+  // NOLINTNEXTLINE
+  GetAuthLogin(use_case::auth::Login<UserRepo>* use_case) noexcept
+      : use_case(use_case) {}
 
-        rep.status = http::server::response::status_type::ok;
-        static_cast<void>(rep.content.copy("Logged In"));
-      }};
-}
+  void
+  operator()(const http::server::request& req, http::server::response& rep) {
+    const char* username = req.get_parameter("username");
+    const char* password = req.get_parameter("password");
+
+    auto err = this->use_case->execute(username, password);
+    if (err) {
+      rep.status = http::server::response::status_type::unauthorized;
+      logger::error(*err);
+      static_cast<void>(rep.content.copy("Auth Failed"));
+      return;
+    }
+
+    rep.status = http::server::response::status_type::ok;
+    static_cast<void>(rep.content.copy("Logged In"));
+  }
+};
 
 } // namespace api
 

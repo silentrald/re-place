@@ -20,11 +20,11 @@ opt_err PgManager::init(
     const char* user, const char* pass, const char* db, const char* host,
     const char* port
 ) noexcept {
-  auto err = this->user.copy(user);
-  err = this->pass.copy(pass);
-  err = this->db.copy(db);
-  err = this->host.copy(host);
-  err = this->port.copy(port);
+  try_opt(this->user.copy(user));
+  try_opt(this->pass.copy(pass));
+  try_opt(this->db.copy(db));
+  try_opt(this->host.copy(host));
+  try_opt(this->port.copy(port));
   return null;
 }
 

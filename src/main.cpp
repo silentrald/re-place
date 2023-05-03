@@ -1,5 +1,7 @@
+#include "api/asio/router.hpp"
 #include "api/asio/server.hpp"
 #include "api/auth.hpp"
+#include "config/logger.hpp"
 #include "config/types.hpp"
 #include "ds-error/error.hpp"
 #include "ds/macro.hpp"
@@ -18,12 +20,15 @@ const char* const DB = "sample_db";
 const char* const HOST = "127.0.0.1";
 const char* const PORT = "5432";
 
-int main(int argc, char* argv[]) {
+opt_err main_wrapper() noexcept {
   // Declare variables here
   repo::PgManager repo{};
-  repo.init(USER, PASS, DB, HOST, PORT);
+  try_opt(repo.init(USER, PASS, DB, HOST, PORT));
+
   repo::UserPg user_repo{&repo};
   use_case::auth::Login<repo::UserPg> login_uc{&user_repo};
+
+  api::GetAuthLogin<repo::UserPg> get_auth_login{&login_uc};
 
   try {
     // This can throw an error
@@ -31,12 +36,25 @@ int main(int argc, char* argv[]) {
 
     srvr.init("127.0.0.1", "5000");
 
-    srvr.add_route(api::get_auth_login(&login_uc));
+    srvr.add_route(http::server::router{
+        .method = HTTP_GET,
+        .path = "/api/auth/login",
+        .endpoint = get_auth_login});
 
     printf("Running: http://127.0.0.1:5000\n");
     srvr.run();
   } catch (std::exception& e) {
     std::cerr << "exception: " << e.what() << "\n";
+  }
+
+  return null;
+}
+
+int main(int argc, char* argv[]) {
+  auto err = main_wrapper();
+  if (err) {
+    logger::fatal(*err);
+    return -1;
   }
 }
 

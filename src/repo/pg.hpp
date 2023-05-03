@@ -34,11 +34,11 @@ public:
 
   // === Constructor === //
 
-  opt_err init(
+  [[nodiscard]] opt_err init(
       const string& user, const string& pass, const string& db,
       const string& host, string& port
   ) noexcept;
-  opt_err init(
+  [[nodiscard]] opt_err init(
       const char* user, const char* pass, const char* db, const char* host,
       const char* port
   ) noexcept;
