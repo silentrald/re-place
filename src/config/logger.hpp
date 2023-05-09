@@ -8,6 +8,8 @@
 #ifndef CONFIG_LOGGER_HPP
 #define CONFIG_LOGGER_HPP
 
+#include "api/asio/request.hpp"
+#include "api/asio/response.hpp"
 #include "config/types.hpp"
 
 namespace logger {
@@ -35,6 +37,9 @@ void warn(const ds::error& err) noexcept;
 void warn(const string& msg) noexcept;
 void warn(const char* msg) noexcept;
 
+void info(
+    const http::server::request& req, const http::server::response& res
+) noexcept;
 void info(const string& msg) noexcept;
 void info(const char* msg) noexcept;
 

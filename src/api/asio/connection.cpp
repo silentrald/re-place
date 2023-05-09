@@ -14,6 +14,7 @@
 #include "api/asio/response.hpp"
 #include "asio/buffer.hpp"
 #include "asio/write.hpp"
+#include "config/logger.hpp"
 #include "config/types.hpp"
 #include "connection_manager.hpp"
 #include "ds/types.hpp"
@@ -105,6 +106,7 @@ void connection::do_read() noexcept {
             llhttp_finish(&this->parser);
 
             this->req_handler.handle_request(this->req, this->res);
+            logger::info(this->req, this->res);
             this->do_write();
             return;
           }

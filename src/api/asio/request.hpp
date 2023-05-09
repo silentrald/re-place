@@ -22,15 +22,25 @@ using json = rapidjson::Document;
 
 namespace http::server {
 
+struct path {
+  string key{};
+  string value{};
+};
+
+class request_handler;
+
 struct request {
 public:
+  friend request_handler;
+
   string uri{};
   string body{};
   vector<header> headers{};
 
 private:
   // TODO: Use union
-  json parameters{};
+  json body_params{};
+  vector<path> path_params{};
 
 public:
   u8 method = 0U;
@@ -41,14 +51,24 @@ public:
     for (const auto& h : this->headers) {
       if (h.name == "content-type" && h.value == "application/json" &&
           !this->body.is_empty()) {
-        this->parameters.Parse(this->body.c_str());
+        this->body_params.Parse(this->body.c_str());
         break;
       }
     }
   }
 
-  const char* get_parameter(const char* param) const {
-    return this->parameters[param].GetString();
+  [[nodiscard]] const char* get_body_parameter(const char* param) const {
+    return this->body_params[param].GetString();
+  }
+
+  [[nodiscard]] const char* get_path_parameter(const char* param) const {
+    for (i32 i = 0; i < this->path_params.size(); ++i) {
+      auto& p = this->path_params[i];
+      if (p.key == param) {
+        return p.value.c_str();
+      }
+    }
+    return nullptr;
   }
 };
 

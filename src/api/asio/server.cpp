@@ -47,6 +47,8 @@ void server::add_route(router&& route) noexcept {
 }
 
 opt_err server::run() noexcept {
+  try_opt(this->req_handler.finalize());
+
   try {
     this->io_cxt.run();
     return null;

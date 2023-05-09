@@ -3,9 +3,7 @@
 #include "api/auth.hpp"
 #include "config/logger.hpp"
 #include "config/types.hpp"
-#include "ds-error/error.hpp"
 #include "ds/macro.hpp"
-#include "ds/types.hpp"
 #include "entity/user.hpp"
 #include "llhttp.h"
 #include "repo/pg/user.hpp"
@@ -28,7 +26,7 @@ opt_err main_wrapper() noexcept {
   repo::UserPg user_repo{&repo};
   use_case::auth::Login<repo::UserPg> login_uc{&user_repo};
 
-  api::GetAuthLogin<repo::UserPg> get_auth_login{&login_uc};
+  api::PostLogin<repo::UserPg> post_login{&login_uc};
 
   try {
     // This can throw an error
@@ -37,11 +35,10 @@ opt_err main_wrapper() noexcept {
     srvr.init("127.0.0.1", "5000");
 
     srvr.add_route(http::server::router{
-        .method = HTTP_GET,
-        .path = "/api/auth/login",
-        .endpoint = get_auth_login});
+        .method = HTTP_POST, .path = "/api/auth/login", .endpoint = post_login}
+    );
 
-    printf("Running: http://127.0.0.1:5000\n");
+    logger::info("Running: http://127.0.0.1:5000");
     srvr.run();
   } catch (std::exception& e) {
     std::cerr << "exception: " << e.what() << "\n";

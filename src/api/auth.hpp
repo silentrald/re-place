@@ -21,19 +21,19 @@
 
 namespace api {
 
-template <typename UserRepo> class GetAuthLogin {
+template <typename UserRepo> class PostLogin {
 private:
   use_case::auth::Login<UserRepo>* use_case = nullptr;
 
 public:
   // NOLINTNEXTLINE
-  GetAuthLogin(use_case::auth::Login<UserRepo>* use_case) noexcept
+  PostLogin(use_case::auth::Login<UserRepo>* use_case) noexcept
       : use_case(use_case) {}
 
   void
   operator()(const http::server::request& req, http::server::response& rep) {
-    const char* username = req.get_parameter("username");
-    const char* password = req.get_parameter("password");
+    const char* username = req.get_body_parameter("username");
+    const char* password = req.get_body_parameter("password");
 
     auto err = this->use_case->execute(username, password);
     if (err) {

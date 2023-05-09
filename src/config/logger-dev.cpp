@@ -8,6 +8,7 @@
 #include "./logger.hpp"
 #include "config/types.hpp"
 #include "ds-error/error.hpp"
+#include "llhttp.h"
 #include <bits/types/struct_timeval.h>
 #include <cstdio>
 #include <ctime>
@@ -194,6 +195,38 @@ inline void print_info_header() noexcept {
   print_header(INFO_MSG, TEXT_GREEN);
 }
 
+const char* get_status_color(i32 status) {
+  if (status >= 200 && status < 300) { // 200s Most Likely
+    return TEXT_GREEN;
+  }
+
+  if (status >= 400) { // 400s & 500s // Likely
+    return TEXT_RED;
+  }
+
+  // 100s & 300s Less Likely
+  return TEXT_BLUE;
+}
+
+void info(
+    const http::server::request& req, const http::server::response& res
+) noexcept {
+  if (log_level < level::INFO)
+    return;
+
+  log_mutex.lock();
+
+  print_info_header();
+  // TODO: Follow this format: https://en.wikipedia.org/wiki/Common_Log_Format
+  printf(
+      "%s %s %s%d%s %d\n", llhttp_method_name((llhttp_method)req.method),
+      req.uri.c_str(), get_status_color(res.status), res.status, RESET,
+      res.content.size()
+  );
+
+  log_mutex.unlock();
+}
+
 void info(const string& msg) noexcept {
   info(msg.c_str());
 }
@@ -205,7 +238,11 @@ void info(const char* msg) noexcept {
   log_mutex.lock();
 
   print_info_header();
-  printf("%s\n", msg);
+  if (msg) {
+    printf("%s\n", msg);
+  } else {
+    printf("nullptr\n");
+  }
 
   log_mutex.unlock();
 }

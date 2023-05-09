@@ -11,6 +11,11 @@
 #include "ds-error/expected.hpp"
 #include "ds-error/types.hpp"
 #include "ds-thread/mutex.hpp"
+#include "ds/bptree_map.hpp"
+#include "ds/compare.hpp"
+#include "ds/equal.hpp"
+#include "ds/hash.hpp"
+#include "ds/hash_map.hpp"
 #include "ds/optional.hpp"
 #include "ds/shared_ptr.hpp"
 #include "ds/string.hpp"
@@ -35,11 +40,19 @@ using u64 = unsigned long long;
 using f32 = float;
 using f64 = double;
 
+using c8 = char;
+
 // === DS === //
 using string = ds::string;
 // TODO:
 template <typename T, i32 Size> using array = std::array<T, Size>;
 template <typename T> using vector = ds::vector<T>;
+template <
+    typename Key, typename Value, typename Hash = ds::hash<Key>,
+    typename Equal = ds::equal<Key>>
+using hash_map = ds::hash_map<Key, Value, Hash, Equal>;
+template <typename Key, typename Value, typename KeyCompare = ds::compare<Key>>
+using map = ds::bptree_map<Key, Value, KeyCompare>;
 template <typename T> using unique_ptr = ds::unique_ptr<T>;
 template <typename T> using shared_ptr = ds::shared_ptr<T>;
 template <typename T> using set = std::set<T>;
