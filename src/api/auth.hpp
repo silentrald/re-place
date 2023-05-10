@@ -21,14 +21,18 @@
 
 namespace api {
 
-template <typename UserRepo> class PostLogin {
-private:
-  use_case::auth::Login<UserRepo>* use_case = nullptr;
-
+template <typename UserRepo, typename SessionCache> class PostLogin {
 public:
-  // NOLINTNEXTLINE
-  PostLogin(use_case::auth::Login<UserRepo>* use_case) noexcept
-      : use_case(use_case) {}
+  opt_err init(use_case::auth::Login<UserRepo, SessionCache>* use_case
+  ) noexcept {
+    if (use_case == nullptr) {
+      // TODO:
+      return error{"value error", def_err_vals};
+    }
+
+    this->use_case = use_case;
+    return null;
+  }
 
   void
   operator()(const http::server::request& req, http::server::response& rep) {
@@ -46,6 +50,9 @@ public:
     rep.status = http::server::response::status_type::ok;
     static_cast<void>(rep.content.copy("Logged In"));
   }
+
+private:
+  use_case::auth::Login<UserRepo, SessionCache>* use_case = nullptr;
 };
 
 } // namespace api

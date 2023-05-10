@@ -9,6 +9,9 @@ add_executable(${PROJECT_NAME} src/main.cpp
 
   src/entity/user.cpp
 
+  src/cache/redis.cpp
+  src/cache/redis/session.cpp
+
   src/repo/pg.cpp
   src/repo/pg/user.cpp
 
@@ -30,8 +33,10 @@ include_directories(external/asio/asio/include)
 add_subdirectory(external/llhttp)
 include_directories(external/llhttp/include)
 
+add_subdirectory(external/hiredis)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ds ds-thread
-  llhttp_shared pq
+  llhttp_shared pq hiredis
 )
 

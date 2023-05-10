@@ -1,6 +1,8 @@
 #include "api/asio/router.hpp"
 #include "api/asio/server.hpp"
 #include "api/auth.hpp"
+#include "cache/redis.hpp"
+#include "cache/redis/session.hpp"
 #include "config/logger.hpp"
 #include "config/types.hpp"
 #include "ds/macro.hpp"
@@ -19,14 +21,27 @@ const char* const HOST = "127.0.0.1";
 const char* const PORT = "5432";
 
 opt_err main_wrapper() noexcept {
-  // Declare variables here
+  logger::info("Setting Up");
+
   repo::PgManager repo{};
   try_opt(repo.init(USER, PASS, DB, HOST, PORT));
 
-  repo::UserPg user_repo{&repo};
-  use_case::auth::Login<repo::UserPg> login_uc{&user_repo};
+  cache::RedisManager redis{};
+  try_opt(redis.init("127.0.0.1", 6379));
 
-  api::PostLogin<repo::UserPg> post_login{&login_uc};
+  repo::UserPg user_repo{};
+  try_opt(user_repo.init(&repo));
+
+  cache::RedisSession session{};
+  try_opt(session.init(&redis));
+
+  use_case::auth::Login<repo::UserPg, cache::RedisSession> login_uc{};
+  login_uc.init(&user_repo, &session);
+
+  api::PostLogin<repo::UserPg, cache::RedisSession> post_login{};
+  try_opt(post_login.init(&login_uc));
+
+  logger::info("Done Setting, trying to start server");
 
   try {
     // This can throw an error

@@ -23,6 +23,16 @@ const i32 GUBU_F_ID = 0;
 const i32 GUBU_F_USERNAME = 1;
 const i32 GUBU_F_PASSWORD = 2;
 
+opt_err UserPg::init(PgManager* repo) noexcept {
+  if (repo == nullptr) {
+    // TODO:
+    return error{"init null", def_err_vals};
+  }
+
+  this->repo = repo;
+  return null;
+}
+
 exp_err<entity::User> UserPg::get_user_by_username_impl(const string& username
 ) noexcept {
   return this->get_user_by_username_impl(username.c_str());

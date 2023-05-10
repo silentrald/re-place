@@ -16,30 +16,28 @@
 namespace repo {
 
 class UserPg : public User<UserPg> {
-private:
-  PgManager* repo = nullptr;
-
 public:
-  UserPg(PgManager* repo) noexcept : repo(repo) {} // NOLINT
+  UserPg() noexcept = default;
   UserPg(const UserPg&) noexcept = delete;
   UserPg& operator=(const UserPg&) noexcept = delete;
-
-  // === Constructor === //
-  opt_err init() noexcept;
-
   UserPg(UserPg&& rhs) noexcept = default;
   UserPg& operator=(UserPg&& rhs) noexcept = default;
-
   ~UserPg() noexcept = default;
+
+  // === Constructor === //
+  opt_err init(PgManager* repo) noexcept;
 
   // === Create === //
   string add_user_impl(const entity::User& user) noexcept;
 
   // === Read === //
-  exp_err<entity::User>
-  get_user_by_username_impl(const string& username) noexcept;
+  exp_err<entity::User> get_user_by_username_impl(const string& username
+  ) noexcept;
   exp_err<entity::User> get_user_by_username_impl(const char* username
   ) noexcept;
+
+private:
+  PgManager* repo = nullptr;
 };
 
 } // namespace repo
