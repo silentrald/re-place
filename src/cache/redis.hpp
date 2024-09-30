@@ -17,7 +17,7 @@ class RedisClient;
 
 class RedisManager {
 private:
-  string host{};
+  string host;
   i32 port = 0;
 
 public:

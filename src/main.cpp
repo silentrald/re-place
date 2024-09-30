@@ -6,7 +6,6 @@
 #include "config/logger.hpp"
 #include "config/types.hpp"
 #include "ds/macro.hpp"
-#include "entity/user.hpp"
 #include "llhttp.h"
 #include "repo/pg/user.hpp"
 #include "use-case/auth/login.hpp"
@@ -14,9 +13,9 @@
 #include <cstring>
 #include <iostream>
 
-const char* const USER = "sample_user";
+const char* const USER = "username";
 const char* const PASS = "password";
-const char* const DB = "sample_db";
+const char* const DB = "replace";
 const char* const HOST = "127.0.0.1";
 const char* const PORT = "5432";
 

@@ -8,7 +8,6 @@
 #include "./pg.hpp"
 #include "config/types.hpp"
 #include "ds/macro.hpp"
-#include "ds/types.hpp"
 #include "libpq-fe.h"
 #include <cstdlib>
 

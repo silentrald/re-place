@@ -11,7 +11,6 @@
 #include "cache/session.hpp"
 #include "config/logger.hpp"
 #include "config/types.hpp"
-#include "ds-error/error.hpp"
 #include "ds/macro.hpp"
 #include "repo/user.hpp"
 #include <cstring>
@@ -62,8 +61,9 @@ public:
       return error{login_err::PASSWORD_MISMATCH, def_err_vals};
     }
 
-    auto session_id = try_exp_err(this->session->set_session(user));
-    logger::info(session_id);
+    // auto session_id = try_exp_err(this->session->set_session(user));
+    // logger::info(session_id);
+    logger::info("Logged in");
 
     return null;
   }

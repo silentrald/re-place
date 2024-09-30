@@ -21,9 +21,9 @@ class UserBuilder;
 
 class User {
 private:
-  string id{};
-  string username{};
-  string password{};
+  string id;
+  string username;
+  string password;
 
 public:
   friend UserBuilder;
@@ -50,9 +50,9 @@ public:
 
 class UserBuilder {
 private:
-  string id{};
-  string username{};
-  string password{};
+  string id;
+  string username;
+  string password;
 
 public:
   // === Constructor === //
@@ -90,4 +90,3 @@ public:
 } // namespace entity
 
 #endif
-

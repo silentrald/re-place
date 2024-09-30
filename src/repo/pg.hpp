@@ -15,12 +15,12 @@ class PgResult;
 
 class PgManager {
 private:
-  string user{};
-  string pass{};
+  string user;
+  string pass;
 
-  string db{};
-  string host{};
-  string port{};
+  string db;
+  string host;
+  string port;
 
   i32 pool_size = 1;
 

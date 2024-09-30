@@ -8,20 +8,18 @@
 #include "./user.hpp"
 #include "config/types.hpp"
 #include "ds/macro.hpp"
-#include "ds/types.hpp"
 #include "entity/user.hpp"
 
 namespace repo {
 
 const char* const GUBU_ID = "gubu";
-const char* const GUBU_QRY = "SELECT id, username, password\n"
+const char* const GUBU_QRY = "SELECT id, password\n"
                              "FROM users\n"
                              "WHERE username = $1\n"
                              "LIMIT 1;";
 const i32 GUBU_PARAMS = 1;
 const i32 GUBU_F_ID = 0;
-const i32 GUBU_F_USERNAME = 1;
-const i32 GUBU_F_PASSWORD = 2;
+const i32 GUBU_F_PASSWORD = 1;
 
 opt_err UserPg::init(PgManager* repo) noexcept {
   if (repo == nullptr) {
@@ -52,10 +50,9 @@ exp_err<entity::User> UserPg::get_user_by_username_impl(const char* username
 
   entity::UserBuilder builder{};
   try_opt_unexp(builder.set_id(res.get(GUBU_F_ID)));
-  try_opt_unexp(builder.set_username(res.get(GUBU_F_USERNAME)));
+  try_opt_unexp(builder.set_username(username));
   try_opt_unexp(builder.set_password(res.get(GUBU_F_PASSWORD)));
   return builder.build();
 }
 
 } // namespace repo
-
