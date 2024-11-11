@@ -11,9 +11,9 @@
 #ifndef API_ASIO_RESPONSE_HPP
 #define API_ASIO_RESPONSE_HPP
 
-#include "asio.hpp"
-#include "config/types.hpp"
+#include "asio/buffer.hpp"
 #include "header.hpp"
+#include "types.hpp"
 
 namespace http::server {
 
@@ -41,7 +41,7 @@ struct response {
   string content;
 
 private:
-  string content_length{};
+  string content_length;
 
 public:
   std::vector<asio::const_buffer> to_buffers();

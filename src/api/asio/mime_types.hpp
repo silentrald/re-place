@@ -11,7 +11,7 @@
 #ifndef API_ASIO_MIME_TYPES_HPP
 #define API_ASIO_MIME_TYPES_HPP
 
-#include "config/types.hpp"
+#include "types.hpp"
 
 namespace http::server::mime_types {
 

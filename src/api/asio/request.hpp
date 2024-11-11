@@ -11,20 +11,17 @@
 #ifndef API_ASIO_REQUEST_HPP
 #define API_ASIO_REQUEST_HPP
 
-#include "config/types.hpp"
-#include "ds/macro.hpp"
-#include "ds/types.hpp"
 #include "header.hpp"
 #include "rapidjson/document.h"
-#include <iostream>
+#include "types.hpp"
 
 using json = rapidjson::Document;
 
 namespace http::server {
 
 struct path {
-  string key{};
-  string value{};
+  string key;
+  string value;
 };
 
 class request_handler;
@@ -33,13 +30,13 @@ struct request {
 public:
   friend request_handler;
 
-  string uri{};
-  string body{};
-  vector<header> headers{};
+  string uri;
+  string body;
+  vector<header> headers;
 
 private:
   // TODO: Use union
-  json body_params{};
+  json body_params;
   vector<path> path_params{};
 
 public:
@@ -62,8 +59,8 @@ public:
   }
 
   [[nodiscard]] const char* get_path_parameter(const char* param) const {
-    for (i32 i = 0; i < this->path_params.size(); ++i) {
-      auto& p = this->path_params[i];
+    for (i32 i = 0; i < this->path_params.get_size(); ++i) {
+      const auto& p = this->path_params[i];
       if (p.key == param) {
         return p.value.c_str();
       }

@@ -10,24 +10,20 @@
 
 #include "api/asio/request.hpp"
 #include "api/asio/response.hpp"
-#include "config/logger.hpp"
-#include "config/types.hpp"
+#include "types.hpp"
 #include "use-case/auth/login.hpp"
+#include "utils/logger/logger.hpp"
 #include <cstdio>
 
 namespace api {
 
-template <typename UserRepo, typename SessionCache> class PostLogin {
+// TODO: Change this
+// template <typename UserRepo, typename SessionCache> class PostLogin {
+template <typename UserRepo> class PostLogin {
 public:
-  opt_err init(use_case::auth::Login<UserRepo, SessionCache>* use_case
-  ) noexcept {
-    if (use_case == nullptr) {
-      // TODO:
-      return error{"value error", def_err_vals};
-    }
-
+  explicit PostLogin(use_case::auth::Login<UserRepo>* use_case) {
+    assert(use_case != nullptr);
     this->use_case = use_case;
-    return null;
   }
 
   void
@@ -38,7 +34,7 @@ public:
     auto err = this->use_case->execute(username, password);
     if (err) {
       rep.status = http::server::response::status_type::unauthorized;
-      logger::error(*err);
+      logger::error("Error code %u", err);
       static_cast<void>(rep.content.copy("Auth Failed"));
       return;
     }
@@ -48,10 +44,10 @@ public:
   }
 
 private:
-  use_case::auth::Login<UserRepo, SessionCache>* use_case = nullptr;
+  // use_case::auth::Login<UserRepo, SessionCache>* use_case = nullptr;
+  use_case::auth::Login<UserRepo>* use_case = nullptr;
 };
 
 } // namespace api
 
 #endif
-

@@ -11,13 +11,13 @@
 #ifndef API_ASIO_HEADER_HPP
 #define API_ASIO_HEADER_HPP
 
-#include "config/types.hpp"
+#include "types.hpp"
 
 namespace http::server {
 
 struct header {
-  string name{};
-  string value{};
+  string name;
+  string value;
 };
 
 } // namespace http::server

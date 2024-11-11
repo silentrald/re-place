@@ -9,7 +9,7 @@
 // https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
 #include "mime_types.hpp"
-#include "config/types.hpp"
+#include "types.hpp"
 #include <cstring>
 
 namespace http::server::mime_types {

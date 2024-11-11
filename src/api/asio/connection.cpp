@@ -14,13 +14,11 @@
 #include "api/asio/response.hpp"
 #include "asio/buffer.hpp"
 #include "asio/write.hpp"
-#include "config/logger.hpp"
-#include "config/types.hpp"
 #include "connection_manager.hpp"
-#include "ds/types.hpp"
 #include "llhttp.h"
 #include "request_handler.hpp"
-#include <algorithm>
+#include "types.hpp"
+#include "utils/logger/logger.hpp"
 #include <cctype>
 #include <cstdio>
 #include <utility>
@@ -31,7 +29,7 @@ connection::connection(
     asio::ip::tcp::socket socket, connection_manager& manager,
     request_handler& handler
 )
-    : socket(std::move(socket)), conn_manager(manager), req_handler(handler) {
+    : socket(std::move(socket)), conn_manager(&manager), req_handler(&handler) {
   llhttp_settings_init(&this->settings);
 
   auto append_tmp = [](llhttp_t* parser, const char* at,
@@ -54,15 +52,15 @@ connection::connection(
 
     header h{};
     h.name = std::move(data->tmp);
-    for (int i = 0; i < h.name.size(); ++i) {
+    for (int i = 0; i < h.name.get_size(); ++i) {
       h.name[i] = std::tolower(h.name[i]);
     }
-    return data->req->headers.push_back(std::move(h)) ? HPE_USER : HPE_OK;
+    return data->req->headers.push(std::move(h)) ? HPE_USER : HPE_OK;
   };
 
   this->settings.on_header_value_complete = [](llhttp_t* parser) -> int {
     auto* data = (req_data*)parser->data;
-    data->req->headers.back_unsafe().value = std::move(data->tmp);
+    data->req->headers.back().value = std::move(data->tmp);
     return HPE_OK;
   };
 
@@ -105,15 +103,19 @@ void connection::do_read() noexcept {
             this->req.finish();
             llhttp_finish(&this->parser);
 
-            this->req_handler.handle_request(this->req, this->res);
-            logger::info(this->req, this->res);
+            this->req_handler->handle_request(this->req, this->res);
+            // TODO: create a logger::http
+            logger::info(
+                "[%s] %s", llhttp_method_name((llhttp_method)this->req.method),
+                this->req.uri.c_str()
+            );
             this->do_write();
             return;
           }
 
           this->do_read();
         } else if (ec != asio::error::operation_aborted) {
-          this->conn_manager.stop(shared_from_this());
+          this->conn_manager->stop(shared_from_this());
         }
       }
   );
@@ -132,11 +134,10 @@ void connection::do_write() noexcept {
         }
 
         if (ec != asio::error::operation_aborted) {
-          this->conn_manager.stop(shared_from_this());
+          this->conn_manager->stop(shared_from_this());
         }
       }
   );
 }
 
 } // namespace http::server
-

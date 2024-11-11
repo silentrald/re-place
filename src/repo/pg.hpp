@@ -5,7 +5,12 @@
  * Created: 2023-04-15
  *============================*/
 
-#include "config/types.hpp"
+// TODO: Check how to do async here
+
+#ifndef REPLACE_REPO_PG_HPP
+#define REPLACE_REPO_PG_HPP
+
+#include "types.hpp"
 #include <libpq-fe.h>
 
 namespace repo {
@@ -14,19 +19,6 @@ class PgClient;
 class PgResult;
 
 class PgManager {
-private:
-  string user;
-  string pass;
-
-  string db;
-  string host;
-  string port;
-
-  i32 pool_size = 1;
-
-  vector<shared_ptr<PgClient>> clients{};
-  vector<shared_ptr<PgClient>> used{};
-
 public:
   PgManager() noexcept = default;
   PgManager(const PgManager&) noexcept = delete;
@@ -34,11 +26,11 @@ public:
 
   // === Constructor === //
 
-  [[nodiscard]] opt_err init(
+  [[nodiscard]] error_code init(
       const string& user, const string& pass, const string& db,
       const string& host, string& port
   ) noexcept;
-  [[nodiscard]] opt_err init(
+  [[nodiscard]] error_code init(
       const char* user, const char* pass, const char* db, const char* host,
       const char* port
   ) noexcept;
@@ -50,13 +42,25 @@ public:
 
   // === Functions === //
 
-  [[nodiscard]] exp_err<shared_ptr<PgClient>> get_client() noexcept;
+  [[nodiscard]] expected<shared_ptr<PgClient>, error_code>
+  get_client() noexcept;
+
+private:
+  string user;
+  string pass;
+
+  string db;
+  string host;
+  string port;
+
+  i32 pool_size = 1;
+
+  // TODO: Look into shared_ptr implementation if not broken
+  vector<shared_ptr<PgClient>> clients{};
+  vector<shared_ptr<PgClient>> used{};
 };
 
 class PgClient {
-private:
-  PGconn* conn = nullptr;
-
 public:
   friend PgManager;
 
@@ -68,19 +72,17 @@ public:
   PgClient& operator=(PgClient&& rhs) noexcept;
   ~PgClient() noexcept;
 
-  [[nodiscard]] opt_err
+  [[nodiscard]] error_code
   prepare(const char* id, const char* query, i32 params) noexcept;
 
-  [[nodiscard]] exp_err<PgResult>
+  [[nodiscard]] expected<PgResult, error_code>
   execute(const char* id, vector<string>& values) noexcept;
+
+private:
+  PGconn* conn = nullptr;
 };
 
 class PgResult {
-private:
-  PGresult* result = nullptr;
-  i32 cursor = 0;
-  i32 size = 0;
-
 public:
   friend PgClient;
 
@@ -94,10 +96,20 @@ public:
 
   [[nodiscard]] i32 count() const noexcept;
 
-  // TODO: Template return
-  char* get(i32 index) noexcept;
+  u32 get_u32(i32 index) noexcept;
+  u64 get_u64(i32 index) noexcept;
+  i32 get_i32(i32 index) noexcept;
+  i64 get_i64(i32 index) noexcept;
+  char* get_string(i32 index) noexcept;
+
   bool next() noexcept;
+
+private:
+  PGresult* result = nullptr;
+  i32 cursor = 0;
+  i32 size = 0;
 };
 
 } // namespace repo
 
+#endif

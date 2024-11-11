@@ -10,19 +10,16 @@
 
 #include "./request.hpp"
 #include "./response.hpp"
-#include "config/types.hpp"
-#include <string>
+#include "types.hpp"
 
 namespace http::server {
 
 struct router { // NOLINT
   i32 method = -1;
   const char* path = nullptr;
-  function<void(const request&, response&)>
-      endpoint{};
+  function<void(const request&, response&)> endpoint;
 };
 
 } // namespace http::server
 
 #endif
-

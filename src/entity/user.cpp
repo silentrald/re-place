@@ -6,31 +6,23 @@
  *============================*/
 
 #include "./user.hpp"
-#include "config/types.hpp"
-#include "ds/macro.hpp"
-#include <utility>
+#include "types.hpp"
+#include <cstring>
 
 namespace entity {
 
-// TODO: Check for compile time creation for these
-const char* USERNAME_EMPTY_ERR = "Username is required";
-const char* USERNAME_MAX_ERR = "Username is too long (max 60 chars)";
-
-const char* PASSWORD_MAX_ERR = "Password is too long (max 60 chars)";
-
 // === User === //
 
-opt_err User::copy(const User& other) noexcept {
-  try_opt(this->id.copy(other.id));
-  try_opt(this->username.copy(other.username));
-  try_opt(this->password.copy(other.password));
-
-  return null;
+error_code User::copy(const User& other) noexcept {
+  this->id = other.id;
+  RP_TRY(this->username.copy(other.username));
+  RP_TRY(this->password.copy(other.password));
+  return error::OK;
 }
 
 // === Getters === //
 
-const string& User::get_id() const noexcept {
+const uuid& User::get_id() const noexcept {
   return this->id;
 }
 
@@ -42,79 +34,83 @@ const string& User::get_password() const noexcept {
   return this->password;
 }
 
-// === UserBuilder === //
+// === Setters === //
 
-// === Id === //
-
-opt_err UserBuilder::set_id(const string& id) noexcept {
-  try_opt(this->id.copy(id));
-  return null;
+void User::set_id(const uuid& id) noexcept {
+  this->id = id;
 }
 
-void UserBuilder::set_id(string&& id) noexcept {
-  this->id = std::move(id);
+void User::set_id(const string& id) noexcept {
+  this->id = id;
 }
 
-opt_err UserBuilder::set_id(const char* id) noexcept {
-  try_opt(this->id.copy(id));
-  return null;
+void User::set_id(const c8* id) noexcept {
+  this->id = id;
 }
 
-// === Username === //
-
-opt_err UserBuilder::set_username(const string& username) noexcept {
-  try_opt(this->username.copy(username));
-  return null;
-}
-
-void UserBuilder::set_username(string&& username) noexcept {
-  this->username = std::move(username);
-}
-
-opt_err UserBuilder::set_username(const char* username) noexcept {
-  try_opt(this->username.copy(username));
-  return null;
-}
-
-// === Password === //
-
-opt_err UserBuilder::set_password(const string& password) noexcept {
-  try_opt(this->password.copy(password));
-  return null;
-}
-
-void UserBuilder::set_password(string&& password) noexcept {
-  this->password = std::move(password);
-}
-
-opt_err UserBuilder::set_password(const char* password) noexcept {
-  try_opt(this->password.copy(password));
-  return null;
-}
-
-// END //
-
-exp_err<User> UserBuilder::build() noexcept {
-
-  // Validation //
-
-  if (this->username.is_empty()) {
-    return unexp_err{error{USERNAME_EMPTY_ERR, def_err_vals}};
+error_code User::set_username(const string& username) noexcept {
+  if (username.is_empty()) {
+    return error::USER_USERNAME_REQUIRED;
   }
 
-  if (this->username.size() > USERNAME_MAX) {
-    return unexp_err{error{USERNAME_MAX_ERR, def_err_vals}};
+  if (username.get_size() > User::USERNAME_MAX) {
+    return error::USER_USERNAME_MAX_LENGTH;
   }
 
-  if (this->password.size() > PASSWORD_MAX) {
-    return unexp_err{error{PASSWORD_MAX_ERR, def_err_vals}};
+  return this->username.copy(username);
+}
+
+error_code User::set_username(const c8* username) noexcept {
+  if (username == nullptr || username[0] == '\0') {
+    return error::USER_USERNAME_REQUIRED;
   }
 
-  User user{};
-  user.id = std::move(this->id);
-  user.username = std::move(this->username);
-  user.password = std::move(this->password);
-  return user;
+  if (strnlen(username, User::USERNAME_MAX + 1) > User::USERNAME_MAX) {
+    return error::USER_USERNAME_MAX_LENGTH;
+  }
+
+  return this->username.copy(username);
+}
+
+error_code User::set_password(const string& password) noexcept {
+  if (password.is_empty()) {
+    return error::USER_PASSWORD_REQUIRED;
+  }
+
+  if (password.get_size() < User::PASSWORD_MIN) {
+    return error::USER_PASSWORD_MIN_LENGTH;
+  }
+
+  if (username.get_size() > User::PASSWORD_MAX) {
+    return error::USER_PASSWORD_MAX_LENGTH;
+  }
+
+  return this->password.copy(password);
+}
+
+error_code User::set_password(const c8* password) noexcept {
+  if (password == nullptr || password[0] == '\0') {
+    return error::USER_PASSWORD_REQUIRED;
+  }
+
+  const u32 size = strnlen(password, User::PASSWORD_MAX + 1);
+  if (size < User::PASSWORD_MIN) {
+    return error::USER_PASSWORD_MIN_LENGTH;
+  }
+
+  if (size > User::PASSWORD_MAX) {
+    return error::USER_PASSWORD_MAX_LENGTH;
+  }
+
+  return this->password.copy(password);
+}
+
+error_code User::set_hashed_password(const string& hash) noexcept {
+  return this->password.copy(hash);
+}
+
+error_code User::set_hashed_password(const c8* hash) noexcept {
+  return this->password.copy(hash);
 }
 
 } // namespace entity

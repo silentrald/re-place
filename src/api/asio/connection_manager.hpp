@@ -11,7 +11,7 @@
 #ifndef API_ASIO_CONNECTION_MANAGER_HPP
 #define API_ASIO_CONNECTION_MANAGER_HPP
 
-#include "config/types.hpp"
+#include "types.hpp"
 #include "connection.hpp"
 
 namespace http::server {

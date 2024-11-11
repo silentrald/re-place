@@ -8,7 +8,7 @@ AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakAfterReturnType: None
-BinPackArguments: true
+# BinPackArguments: BPPS_BinPack
 BinPackParameters: true
 ReferenceAlignment: Left
 PackConstructorInitializers: NextLine

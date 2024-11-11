@@ -12,7 +12,7 @@
 #define API_ASIO_REQUEST_HANDLER_HPP
 
 #include "./router.hpp"
-#include "config/types.hpp"
+#include "types.hpp"
 #include <cstring>
 
 namespace http::server {
@@ -22,7 +22,7 @@ struct request;
 
 struct dynamic_router_data {
   // Identifier for path
-  string name{};
+  string name;
   // 0xFFFF means unset
   //  MSB tells whether it links to a dynamic or static
   //  The other bits tells the position
@@ -59,16 +59,16 @@ public:
   ~request_handler() noexcept = default;
 
   // === Functions === //
-  opt_err set_base_path(const string& base) noexcept;
-  opt_err set_base_path(const char* base) noexcept;
+  error_code set_base_path(const string& base) noexcept;
+  error_code set_base_path(const char* base) noexcept;
 
-  opt_err add_route(router&& route) noexcept;
-  opt_err finalize() noexcept;
+  error_code add_route(router&& route) noexcept;
+  error_code finalize() noexcept;
 
   void handle_request(request& req, response& res) noexcept;
 
 private:
-  string base{};
+  string base;
 
   vector<static_router_data> static_routes{};
   vector<dynamic_router_data> dynamic_routes{};
@@ -78,14 +78,17 @@ private:
   map<router_key, function<void(const request&, response&)>, router_key>
       routers{};
 
-  [[nodiscard]] exp_err<u32> create_static_route() noexcept;
-  [[nodiscard]] exp_err<u32> create_dynamic_route() noexcept;
+  [[nodiscard]] expected<u32, error_code> create_static_route() noexcept;
+  [[nodiscard]] expected<u32, error_code> create_dynamic_route() noexcept;
 
-  [[nodiscard]] opt_err add_endpoint(static_router_data* sptr, u32 method, function<void(const request&, response&)>&& endpoint) noexcept;
-  [[nodiscard]] exp_err<u32> create_endpoint(
+  [[nodiscard]] error_code add_endpoint(
+      static_router_data* sptr, u32 method,
+      function<void(const request&, response&)>&& endpoint
+  ) noexcept;
+  [[nodiscard]] expected<u32, error_code> create_endpoint(
       u32 method, function<void(const request&, response&)>&& endpoint
   ) noexcept;
-  [[nodiscard]] opt_err append_endpoint(
+  [[nodiscard]] error_code append_endpoint(
       u32 method, function<void(const request&, response&)>&& endpoint
   ) noexcept;
 

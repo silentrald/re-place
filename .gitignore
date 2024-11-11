@@ -1,5 +1,10 @@
+# Nvim / Valgrind
 .cache
 .gdb_history
 
+# Release Folders
 build
 release
+
+# Miscellaneous
+todo

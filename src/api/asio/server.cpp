@@ -9,15 +9,15 @@
 // https://github.com/chriskohlhoff/asio/tree/master/asio/src/examples/cpp11/http/server
 
 #include "server.hpp"
-#include "config/types.hpp"
-#include "ds/macro.hpp"
+#include "types.hpp"
+#include "utils/logger/logger.hpp"
 #include <csignal>
 #include <exception>
 #include <utility>
 
 namespace http::server {
 
-opt_err server::init(const char* host, const char* port) noexcept {
+error_code server::init(const char* host, const char* port) noexcept {
   try {
     signals.add(SIGINT);
     signals.add(SIGTERM);
@@ -36,9 +36,10 @@ opt_err server::init(const char* host, const char* port) noexcept {
 
     do_accept();
 
-    return null;
+    return error::OK;
   } catch (std::exception& err) {
-    return error{err.what(), def_err_vals};
+    logger::error("server run error: %s", err.what());
+    return error::SERVER_INIT_ERROR;
   }
 }
 
@@ -46,14 +47,15 @@ void server::add_route(router&& route) noexcept {
   this->req_handler.add_route(std::forward<router&&>(route));
 }
 
-opt_err server::run() noexcept {
-  try_opt(this->req_handler.finalize());
+error_code server::run() noexcept {
+  RP_TRY(this->req_handler.finalize());
 
   try {
     this->io_cxt.run();
-    return null;
+    return error::OK;
   } catch (std::exception& err) {
-    return error{err.what(), def_err_vals};
+    logger::error("server run error: %s", err.what());
+    return error::SERVER_RUN_ERROR;
   }
 }
 

@@ -6,41 +6,42 @@
  *============================*/
 
 #include "./pg.hpp"
-#include "config/types.hpp"
-#include "ds/macro.hpp"
 #include "libpq-fe.h"
+#include "types.hpp"
+#include <cstdio>
 #include <cstdlib>
 
 namespace repo {
 
 // === PgManager === //
 
-opt_err PgManager::init(
+error_code PgManager::init(
     const char* user, const char* pass, const char* db, const char* host,
     const char* port
 ) noexcept {
-  try_opt(this->user.copy(user));
-  try_opt(this->pass.copy(pass));
-  try_opt(this->db.copy(db));
-  try_opt(this->host.copy(host));
-  try_opt(this->port.copy(port));
-  return null;
+  RP_TRY(this->user.copy(user));
+  RP_TRY(this->pass.copy(pass));
+  RP_TRY(this->db.copy(db));
+  RP_TRY(this->host.copy(host));
+  RP_TRY(this->port.copy(port));
+  return error::OK;
 }
 
-exp_err<shared_ptr<PgClient>> PgManager::get_client() noexcept {
+expected<shared_ptr<PgClient>, error_code> PgManager::get_client() noexcept {
   shared_ptr<PgClient> client{};
-  // TODO: Add pooling here
-  try_opt_unexp(client.init());
+  RP_TRY(client.init(), rp::to_unexpected);
+
+  // TODO: Pooling
   client->conn = PQsetdbLogin(
       this->host.c_str(), this->port.c_str(), nullptr, nullptr,
       this->db.c_str(), this->user.c_str(), this->pass.c_str()
   );
+
   if (PQstatus(client->conn) != CONNECTION_OK) {
-    return unexp_err{error{
-        PQerrorMessage(client->conn), err::DB_CONN_ERR,
-        "Could not connect to the database", def_err_vals}};
+    return unexpected<error_code>{error::DB_CONNECTION_ERROR};
   }
-  return client;
+
+  return std::move(client);
 }
 
 // === PgClient === //
@@ -67,43 +68,47 @@ PgClient::~PgClient() noexcept {
   }
 }
 
-opt_err
+error_code
 PgClient::prepare(const char* id, const char* query, i32 params) noexcept {
-  auto* result = PQprepare(this->conn, id, query, params, nullptr);
+  PGresult* result = PQprepare(this->conn, id, query, params, nullptr);
   if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-    error err{
-        PQresultErrorMessage(result), err::DB_PREPARE_ERR,
-        "Could not prepare query", def_err_vals};
+    // TODO: Log the result
+    // error err{
+    //     PQresultErrorMessage(result), err::DB_PREPARE_ERR,
+    //     "Could not prepare query", def_err_vals
+    // };
     PQclear(result);
-    return err;
+    return error::DB_PREPARE_ERROR;
   }
 
   PQclear(result);
-  return null;
+  return error::OK;
 }
 
-exp_err<PgResult>
-PgClient::execute(const char* id, vector<string>& values) noexcept {
-  vector<const char*> cvalues{};
+expected<PgResult, error_code>
+PgClient::execute(const c8* id, vector<string>& values) noexcept {
+  vector<const c8*> string_values{};
+  RP_TRY(string_values.reserve(values.get_size()), rp::to_unexpected);
 
-  try_opt_unexp(cvalues.reserve(values.size()));
-
-  for (const auto& v : values) {
-    static_cast<void>(cvalues.push_back(v.c_str()));
+  for (const auto& val : values) {
+    static_cast<void>(string_values.push(val.c_str()));
   }
 
   PgResult res{};
   res.result = PQexecPrepared(
-      this->conn, id, values.size(), cvalues.data(), nullptr, nullptr, 0
+      this->conn, id, values.get_size(), string_values.get_data(), nullptr,
+      nullptr, 0
   );
   if (PQresultStatus(res.result) != PGRES_TUPLES_OK) {
-    return unexp_err{error{
-        PQresultErrorMessage(res.result), err::DB_EXEC_ERR,
-        "Could not execute query", def_err_vals}};
+    // return unexp_err{error{
+    //     PQresultErrorMessage(res.result), err::DB_EXEC_ERR,
+    //     "Could not execute query", def_err_vals
+    // }};
+    return unexpected<error_code>{error::DB_EXECUTION_ERROR};
   }
 
   res.size = PQntuples(res.result);
-  return res;
+  return std::move(res);
 }
 
 // === PgResult === //
@@ -138,7 +143,7 @@ i32 PgResult::count() const noexcept {
   return this->size;
 }
 
-char* PgResult::get(i32 index) noexcept {
+c8* PgResult::get_string(i32 index) noexcept {
   return PQgetvalue(this->result, this->cursor, index);
 }
 
@@ -147,4 +152,3 @@ bool PgResult::next() noexcept {
 }
 
 } // namespace repo
-

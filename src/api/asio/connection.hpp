@@ -11,13 +11,12 @@
 #ifndef API_ASIO_CONNECTION_HPP
 #define API_ASIO_CONNECTION_HPP
 
-#include "asio.hpp"
-#include "config/types.hpp"
+#include "asio/ip/tcp.hpp"
 #include "llhttp.h"
 #include "request.hpp"
 #include "request_handler.hpp"
 #include "response.hpp"
-#include <array>
+#include "types.hpp"
 #include <memory>
 
 namespace http::server {
@@ -25,7 +24,7 @@ namespace http::server {
 class connection_manager;
 
 struct req_data {
-  string tmp{};
+  string tmp;
   request* req = nullptr;
 };
 
@@ -42,7 +41,7 @@ public:
   );
 
   connection(connection&& rhs) noexcept = default;
-  connection& operator=(connection&& rhs) noexcept = default;
+  connection& operator=(connection&& rhs) noexcept = delete;
 
   ~connection() noexcept = default;
 
@@ -52,8 +51,8 @@ public:
 private:
   asio::ip::tcp::socket socket;
 
-  connection_manager& conn_manager;
-  request_handler& req_handler;
+  connection_manager* conn_manager;
+  request_handler* req_handler;
   array<char, 8192> buffer{};
 
   llhttp_t parser{};
