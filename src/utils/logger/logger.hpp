@@ -5,8 +5,8 @@
  * Created: 2023-05-03
  *============================*/
 
-#ifndef CONFIG_LOGGER_HPP
-#define CONFIG_LOGGER_HPP
+#ifndef UTILS_LOGGER_HPP
+#define UTILS_LOGGER_HPP
 
 // #include "api/asio/request.hpp"
 // #include "api/asio/response.hpp"

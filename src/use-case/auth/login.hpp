@@ -11,12 +11,11 @@
 #include "entity/user.hpp"
 #include "repo/user/def.hpp"
 #include "types.hpp"
+#include "utils/crypto/crypto.hpp"
 #include "utils/logger/logger.hpp"
 #include <cstring>
 
 namespace use_case::auth {
-
-namespace login_err {} // namespace login_err
 
 // template <typename UserRepo, typename SessionCache> class Login {
 template <typename UserRepo> class Login {
@@ -64,7 +63,8 @@ public:
     entity::User user = RP_TRY_RETURN(
         this->user_repo->get_user_by_username(username), rp::to_error_code
     );
-    if (user.get_password() != password) {
+
+    if (!crypto::verify_password(user.get_password(), password)) {
       return error::USE_CASE_AUTH_LOGIN_PASSWORD_MISMATCH;
     }
 

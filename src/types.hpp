@@ -5,8 +5,8 @@
  * Created: 2023-04-13
  *============================*/
 
-#ifndef CONFIG_TYPES_HPP
-#define CONFIG_TYPES_HPP
+#ifndef REPLACE_TYPES_HPP
+#define REPLACE_TYPES_HPP
 
 #include "ds/bptree_map.hpp"
 #include "ds/compare.hpp"
@@ -87,7 +87,9 @@ enum error : u32 {
   THREAD_ERROR = 9,
 
   SERVER_INIT_ERROR = 10,
-  SERVER_RUN_ERROR = 10,
+  SERVER_RUN_ERROR,
+
+  CRYPTO_HASH_ERROR,
 
   // DB
   DB_CONNECTION_ERROR = 100,
@@ -145,7 +147,7 @@ inline unexpected<error_code> to_unexpected(expected<T, error_code>& exp
 // 00000000-0000-0000-0000-000000000000
 class uuid {
 private:
-  static const u32 SIZE = 36;
+  static const u32 SIZE = 37;
 
 public:
   uuid() noexcept {
@@ -223,7 +225,7 @@ public:
   }
 
 private:
-  c8 str[36] = {}; // NOLINT
+  c8 str[40] = {}; // NOLINT
 };
 
 // === Macros === //

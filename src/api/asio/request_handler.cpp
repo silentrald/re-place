@@ -146,8 +146,7 @@ error_code request_handler::finalize() noexcept {
     RP_TRY(path.copy(it.key().path));
 
     if (path[path.get_size() - 1] == '/') {
-      // TODO: Create an pop_back_unsafe
-      static_cast<void>(path.pop_back());
+      static_cast<void>(path.pop());
     }
 
     sptr = this->static_routes.get_data();

@@ -7,6 +7,7 @@
 
 #include "./user.hpp"
 #include "types.hpp"
+#include "utils/crypto/crypto.hpp"
 #include <cstring>
 
 namespace entity {
@@ -85,7 +86,9 @@ error_code User::set_password(const string& password) noexcept {
     return error::USER_PASSWORD_MAX_LENGTH;
   }
 
-  return this->password.copy(password);
+  return this->password.copy(
+      RP_TRY_RETURN(crypto::hash_password(password), rp::to_error_code)
+  );
 }
 
 error_code User::set_password(const c8* password) noexcept {
@@ -102,7 +105,9 @@ error_code User::set_password(const c8* password) noexcept {
     return error::USER_PASSWORD_MAX_LENGTH;
   }
 
-  return this->password.copy(password);
+  return this->password.copy(
+      RP_TRY_RETURN(crypto::hash_password(password), rp::to_error_code)
+  );
 }
 
 error_code User::set_hashed_password(const string& hash) noexcept {

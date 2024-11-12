@@ -10,3 +10,6 @@
 [submodule "external/rapidjson"]
 	path = external/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
+[submodule "external/argon2"]
+	path = external/argon2
+	url = https://github.com/P-H-C/phc-winner-argon2.git
