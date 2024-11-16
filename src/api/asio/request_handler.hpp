@@ -13,6 +13,7 @@
 
 #include "./router.hpp"
 #include "types.hpp"
+#include <cassert>
 #include <cstring>
 
 namespace http::server {
@@ -48,6 +49,22 @@ struct router_key {
   operator()(const router_key& k1, const router_key& k2) const noexcept;
 };
 
+struct router_callback {
+  const void* data = nullptr;
+  void (*endpoint)(const void*, const request&, response&) noexcept = nullptr;
+
+  error_code copy(const router_callback& other) noexcept {
+    this->data = other.data;
+    this->endpoint = other.endpoint;
+    return error::OK;
+  }
+
+  inline void execute(const request& req, response& res) const noexcept {
+    assert(this->endpoint != nullptr);
+    this->endpoint(data, req, res);
+  }
+};
+
 class request_handler {
 public:
   request_handler(const request_handler&) noexcept = delete;
@@ -62,7 +79,7 @@ public:
   error_code set_base_path(const string& base) noexcept;
   error_code set_base_path(const char* base) noexcept;
 
-  error_code add_route(router&& route) noexcept;
+  error_code add_route(router route) noexcept;
   error_code finalize() noexcept;
 
   void handle_request(request& req, response& res) noexcept;
@@ -73,27 +90,20 @@ private:
   vector<static_router_data> static_routes{};
   vector<dynamic_router_data> dynamic_routes{};
   vector<u32> endpoints{};
-  vector<function<void(const request&, response&)>> callbacks{};
+  vector<router_callback> callbacks{};
 
-  map<router_key, function<void(const request&, response&)>, router_key>
-      routers{};
+  map<router_key, router_callback, router_key> routers{};
 
   [[nodiscard]] expected<u32, error_code> create_static_route() noexcept;
   [[nodiscard]] expected<u32, error_code> create_dynamic_route() noexcept;
 
   [[nodiscard]] error_code add_endpoint(
-      static_router_data* sptr, u32 method,
-      function<void(const request&, response&)>&& endpoint
+      static_router_data* sptr, u32 method, const router_callback& callback
   ) noexcept;
-  [[nodiscard]] expected<u32, error_code> create_endpoint(
-      u32 method, function<void(const request&, response&)>&& endpoint
-  ) noexcept;
-  [[nodiscard]] error_code append_endpoint(
-      u32 method, function<void(const request&, response&)>&& endpoint
-  ) noexcept;
-
-  // === Debugging Purposes === //
-  void print_routes() const noexcept;
+  [[nodiscard]] expected<u32, error_code>
+  create_endpoint(u32 method, const router_callback& callback) noexcept;
+  [[nodiscard]] error_code
+  append_endpoint(u32 method, const router_callback& callback) noexcept;
 };
 
 } // namespace http::server

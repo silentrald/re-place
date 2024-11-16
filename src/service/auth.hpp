@@ -2,32 +2,29 @@
  * Author/s:
  *  - silentrald
  * Version: 1.0
- * Created: 2023-04-15
+ * Created: 2023-11-16
  *============================*/
 
-#ifndef USE_CASE_AUTH_LOGIN_HPP
-#define USE_CASE_AUTH_LOGIN_HPP
+#ifndef SERVICE_AUTH_HPP
+#define SERVICE_AUTH_HPP
 
-#include "entity/user.hpp"
 #include "repo/user/def.hpp"
-#include "types.hpp"
 #include "utils/crypto/crypto.hpp"
 #include "utils/logger/logger.hpp"
-#include <cstring>
 
-namespace use_case::auth {
+namespace service {
 
-// template <typename UserRepo, typename SessionCache> class Login {
-template <typename UserRepo> class Login {
+template <typename UserRepo> class Auth {
 public:
-  explicit Login(repo::User<UserRepo>* user_repo) noexcept {
+  explicit Auth(repo::User<UserRepo>* user_repo) noexcept {
     assert(user_repo != nullptr);
     this->user_repo = user_repo;
-    // this->session = session;
   }
 
+  // === Login === //
+
   [[nodiscard]] error_code
-  execute(const string& username, const string& password) noexcept {
+  login(const string& username, const string& password) const noexcept {
     if (username.is_empty()) {
       return error::USE_CASE_AUTH_LOGIN_USERNAME_EMPTY;
     }
@@ -51,7 +48,7 @@ public:
   }
 
   [[nodiscard]] error_code
-  execute(const char* username, const char* password) noexcept {
+  login(const char* username, const char* password) const noexcept {
     if (username == nullptr || username[0] == '\0') {
       return error::USE_CASE_AUTH_LOGIN_USERNAME_EMPTY;
     }
@@ -75,11 +72,25 @@ public:
     return error::OK;
   }
 
+  // === Register === //
+
+  [[nodiscard]] error_code
+  execute(const c8* username, const c8* password) const noexcept {
+    entity::User user{};
+    RP_TRY(user.set_username(username));
+    RP_TRY(user.set_password(password));
+
+    uuid id = RP_TRY_RETURN(this->user_repo->add_user(user), rp::to_error_code);
+
+    logger::info("User [%s]:%s", id.get_string(), user.get_username().c_str());
+
+    return error::OK;
+  }
+
 private:
   repo::User<UserRepo>* user_repo = nullptr;
-  // cache::Session<SessionCache>* session = nullptr;
 };
 
-} // namespace use_case::auth
-//
+} // namespace service
+
 #endif

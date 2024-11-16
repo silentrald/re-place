@@ -10,7 +10,6 @@
 
 #include "request_handler.hpp"
 #include "api/asio/router.hpp"
-#include "mime_types.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "types.hpp"
@@ -54,11 +53,12 @@ i32 router_key::operator()(const router_key& k1, const router_key& k2)
   return diff != 0 ? diff : k1.method - k2.method;
 }
 
-error_code request_handler::add_route(router&& route) noexcept {
+error_code request_handler::add_route(router route) noexcept {
   assert(route.path != nullptr);
 
   RP_TRY(this->routers.insert(
-      {.path = route.path, .method = route.method}, std::move(route.endpoint)
+      {.path = route.path, .method = route.method},
+      {.data = route.data, .endpoint = route.endpoint}
   ));
   return error::OK;
 }
@@ -74,34 +74,33 @@ expected<u32, error_code> request_handler::create_dynamic_route() noexcept {
 }
 
 error_code request_handler::add_endpoint(
-    static_router_data* sptr, u32 method,
-    function<void(const request&, response&)>&& endpoint
+    static_router_data* sptr, u32 method, const router_callback& callback
 ) noexcept {
   if (sptr->endpoint_pos == -1) {
     sptr->endpoint_pos = RP_TRY_RETURN(
-        this->create_endpoint(method, std::move(endpoint)), rp::to_error_code
+        this->create_endpoint(method, callback), rp::to_error_code
     );
   } else {
-    RP_TRY(this->append_endpoint(method, std::move(endpoint)));
+    RP_TRY(this->append_endpoint(method, callback));
   }
   return error::OK;
 }
 
 expected<u32, error_code> request_handler::create_endpoint(
-    u32 method, function<void(const request&, response&)>&& endpoint
+    u32 method, const router_callback& callback
 ) noexcept {
   method |= 0x80000000;
   RP_TRY(this->endpoints.push(method), rp::to_unexpected);
-  RP_TRY(this->callbacks.push(std::move(endpoint)), rp::to_unexpected);
+  RP_TRY(this->callbacks.push(callback), rp::to_unexpected);
 
   return this->endpoints.get_size() - 1;
 }
 
 error_code request_handler::append_endpoint(
-    u32 method, function<void(const request&, response&)>&& endpoint
+    u32 method, const router_callback& callback
 ) noexcept {
   RP_TRY(this->endpoints.push(method));
-  RP_TRY(this->callbacks.push(std::move(endpoint)));
+  RP_TRY(this->callbacks.push(callback));
   return error::OK;
 }
 
@@ -226,7 +225,7 @@ error_code request_handler::finalize() noexcept {
       sptr = &this->static_routes[id];
     }
 
-    RP_TRY(this->add_endpoint(sptr, it.key().method, std::move(it.value())));
+    RP_TRY(this->add_endpoint(sptr, it.key().method, it.value()));
   }
 
   this->routers.clear();
@@ -245,7 +244,7 @@ void request_handler::handle_request(request& req, response& res) noexcept {
     if (sroute->endpoint_pos == -1) {
       res = response::stock_response(response::not_found);
     } else {
-      this->callbacks[sroute->endpoint_pos](req, res);
+      this->callbacks[sroute->endpoint_pos].execute(req, res);
     }
     return;
   }
@@ -317,14 +316,14 @@ void request_handler::handle_request(request& req, response& res) noexcept {
   // Find the appropriate endpoint
   u32 endpoint = this->endpoints[sroute->endpoint_pos];
   if (get_method(endpoint) == req.method) {
-    this->callbacks[sroute->endpoint_pos](req, res);
+    this->callbacks[sroute->endpoint_pos].execute(req, res);
     return;
   }
 
   for (start = sroute->endpoint_pos + 1;
        start < this->endpoints.get_size() && !is_new_endpoint(start); ++start) {
     if (get_method(this->endpoints[start] == req.method)) {
-      this->callbacks[start](req, res);
+      this->callbacks[start].execute(req, res);
       return;
     }
   }

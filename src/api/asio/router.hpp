@@ -14,10 +14,13 @@
 
 namespace http::server {
 
-struct router { // NOLINT
+struct router {
   i32 method = -1;
   const char* path = nullptr;
-  function<void(const request&, response&)> endpoint;
+  // Passed as the first parameter of the endpoint function call
+  const void* data = nullptr;
+  // First parameter contains the dependency injected classes
+  void (*endpoint)(const void*, const request&, response&) noexcept = nullptr;
 };
 
 } // namespace http::server
