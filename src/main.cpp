@@ -8,32 +8,37 @@
 #include <cstdio>
 #include <cstring>
 
-const char* const USER = "username";
-const char* const PASS = "password";
-const char* const DB = "replace";
-const char* const HOST = "127.0.0.1";
-const char* const PORT = "5432";
+const c8* const DB_USER = "username";
+const c8* const DB_PASS = "password";
+const c8* const DB_NAME = "replace";
+const c8* const DB_HOST = "127.0.0.1";
+const c8* const DB_PORT = "5432";
+
+const c8* const SERVER_HOST = "127.0.0.1";
+const c8* const SERVER_PORT = "5000";
 
 error_code main_wrapper() noexcept {
-  logger::info("Setting Up");
+  logger::info("Initializing server");
 
   repo::PgManager repo{};
-  RP_TRY(repo.init(USER, PASS, DB, HOST, PORT));
+  RP_TRY(repo.init(DB_USER, DB_PASS, DB_NAME, DB_HOST, DB_PORT));
 
   repo::UserPg user_repo{&repo};
   service::Auth<repo::UserPg> auth_service{&user_repo};
 
-  logger::info("Done Setting, trying to start server");
+  logger::info("Done initialization, trying to start server");
 
   try {
     // This can throw an error
     http::server::server server{};
 
-    server.init("127.0.0.1", "5000");
+    server.init(SERVER_HOST, SERVER_PORT);
     api::auth::setup(server, &auth_service);
 
-    logger::info("Running: http://127.0.0.1:5000");
+    logger::info("Server running at: http://%s:%s", SERVER_HOST, SERVER_PORT);
     server.run();
+
+    printf("\n"); // For the signal character
     logger::info("Exiting");
   } catch (std::exception& e) {
     logger::error("Exception: %s", e.what());
