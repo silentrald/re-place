@@ -13,3 +13,6 @@
 [submodule "external/argon2"]
 	path = external/argon2
 	url = https://github.com/P-H-C/phc-winner-argon2.git
+[submodule "external/libvalkey"]
+	path = external/libvalkey
+	url = https://github.com/valkey-io/libvalkey.git

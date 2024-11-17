@@ -12,7 +12,7 @@
 namespace repo {
 
 UserPg::UserPg(PgManager* manager) noexcept {
-  assert(manager != manager);
+  assert(manager != nullptr);
   this->manager = manager;
 }
 
@@ -54,15 +54,8 @@ UserPg::get_user_by_username_impl(const char* username) noexcept {
   vector<string> values{};
   RP_TRY(values.push(username), rp::to_unexpected);
 
-  // shared_ptr<PgClient> client =
-  //     RP_TRY_RETURN(this->manager->get_client(), rp::to_unexpected);
-  auto client = ({
-    auto exp = this->manager->get_client();
-    if (rp::is_error(exp)) {
-      return std::move(rp ::to_unexpected(exp));
-    }
-    std::move(*exp);
-  });
+  shared_ptr<PgClient> client =
+      RP_TRY_RETURN(this->manager->get_client(), rp::to_unexpected);
 
   const c8* ID = "select_user";
   RP_TRY(

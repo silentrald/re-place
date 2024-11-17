@@ -13,7 +13,9 @@ add_executable(${PROJECT_NAME}
   src/entity/user.cpp
 
   src/repo/pg.cpp
+  src/repo/valkey.cpp
   src/repo/user/pg.cpp
+  src/repo/session/valkey.cpp
 
   # src/cache/redis.cpp
   # src/cache/redis/session.cpp
@@ -32,18 +34,20 @@ add_subdirectory(external/ds)
 include_directories(external/rapidjson/include)
 include_directories(external/ds/src)
 include_directories(external/asio/asio/include)
-include_directories(external/argon2/include)
 
 add_subdirectory(external/llhttp)
 include_directories(external/llhttp/include)
 
-find_package(Argon2 REQUIRED)
+add_subdirectory(external/libvalkey)
+include_directories(external/libvalkey/include)
 
-# add_subdirectory(external/hiredis)
+find_package(Argon2 REQUIRED)
+include_directories(external/argon2/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ds pq
+  valkey event
   llhttp_shared
-  argon2
+  uuid argon2
 )
 

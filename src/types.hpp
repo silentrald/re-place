@@ -25,6 +25,7 @@
 #include <cstring>
 #include <functional>
 #include <set>
+#include <uuid/uuid.h>
 
 // === Primitives === //
 
@@ -91,10 +92,17 @@ enum error : u32 {
 
   CRYPTO_HASH_ERROR,
 
+  EVENT_ALLOCATION_ERROR,
+
   // DB
   DB_CONNECTION_ERROR = 100,
   DB_PREPARE_ERROR,
   DB_EXECUTION_ERROR,
+
+  VALKEY_CONNECTION_ERROR,
+  VALKEY_COMMAND_ERROR,
+  VALKEY_TYPE_ERROR,
+  VALKEY_NONE_DELETED_ERROR,
 
   // Entities
   USER_USERNAME_REQUIRED = 1000,
@@ -146,10 +154,10 @@ inline unexpected<error_code> to_unexpected(expected<T, error_code>& exp
 
 // 00000000-0000-0000-0000-000000000000
 class uuid {
-private:
-  static const u32 SIZE = 37;
-
 public:
+  static const u32 CAPACITY = 37U;
+  static const u32 SIZE = CAPACITY - 1U;
+
   uuid() noexcept {
     this->str[0] = '\0';
   };
@@ -157,10 +165,12 @@ public:
   explicit uuid(const string& str) noexcept {
     assert(str.get_size() == SIZE);
     std::strncpy(this->str, str.c_str(), SIZE);
+    this->str[SIZE] = '\0';
   }
 
   explicit uuid(const c8* str) noexcept {
     std::strncpy(this->str, str, SIZE);
+    this->str[SIZE] = '\0';
   }
 
   uuid(const uuid& other) noexcept {
@@ -170,6 +180,7 @@ public:
   uuid& operator=(const uuid& rhs) noexcept {
     if (this != &rhs) {
       std::strncpy(this->str, rhs.str, SIZE);
+      this->str[SIZE] = '\0';
     }
     return *this;
   }
@@ -187,30 +198,42 @@ public:
 
   uuid& operator=(const c8* str) noexcept {
     std::strncpy(this->str, str, SIZE);
+    this->str[SIZE] = '\0';
     return *this;
   }
 
   uuid& operator=(const string& str) noexcept {
     assert(str.get_size() == SIZE);
     std::strncpy(this->str, str.c_str(), SIZE);
+    this->str[SIZE] = '\0';
     return *this;
   }
 
   ~uuid() noexcept = default;
 
+  void generate_uuidv4() noexcept {
+    uuid_t uuid{};
+    uuid_generate_random(uuid);
+    uuid_unparse_lower(uuid, this->str);
+  }
+
   [[nodiscard]] const c8* get_string() const noexcept {
     return this->str;
   }
 
-  bool operator==(const uuid& rhs) noexcept {
+  [[nodiscard]] bool is_empty() const noexcept {
+    return this->str[0] == '\0';
+  }
+
+  [[nodiscard]] bool operator==(const uuid& rhs) noexcept {
     return std::strncmp(this->str, rhs.str, SIZE) == 0;
   }
 
-  bool operator==(const c8* str) noexcept {
+  [[nodiscard]] bool operator==(const c8* str) noexcept {
     return str[SIZE] != '\0' && std::strncmp(this->str, str, SIZE) == 0;
   }
 
-  bool operator==(const string& str) noexcept {
+  [[nodiscard]] bool operator==(const string& str) noexcept {
     return str.get_size() == SIZE &&
            std::strncmp(this->str, str.c_str(), SIZE) == 0;
   }
