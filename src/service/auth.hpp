@@ -47,7 +47,7 @@ public:
     auto user = RP_TRY_RETURN(
         this->user_repo->get_user_by_username(), rp::to_unexpected
     );
-    if (user.get_password() != password) {
+    if (!crypto::verify_password(user.get_password(), password)) {
       return unexpected<error_code>{error::USE_CASE_AUTH_LOGIN_PASSWORD_MISMATCH
       };
     }
@@ -74,7 +74,6 @@ public:
     entity::User user = RP_TRY_RETURN(
         this->user_repo->get_user_by_username(username), rp::to_unexpected
     );
-
     if (!crypto::verify_password(user.get_password(), password)) {
       return unexpected<error_code>{error::USE_CASE_AUTH_LOGIN_PASSWORD_MISMATCH
       };

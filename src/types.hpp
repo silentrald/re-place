@@ -92,10 +92,8 @@ enum error : u32 {
 
   CRYPTO_HASH_ERROR,
 
-  EVENT_ALLOCATION_ERROR,
-
   // DB
-  DB_CONNECTION_ERROR = 100,
+  DB_CONNECTION_ERROR,
   DB_PREPARE_ERROR,
   DB_EXECUTION_ERROR,
 
@@ -105,22 +103,32 @@ enum error : u32 {
   VALKEY_NONE_DELETED_ERROR,
 
   // Entities
-  USER_USERNAME_REQUIRED = 1000,
+  USER_USERNAME_REQUIRED,
   USER_USERNAME_MAX_LENGTH,
   USER_PASSWORD_REQUIRED,
   USER_PASSWORD_MIN_LENGTH,
   USER_PASSWORD_MAX_LENGTH,
 
   // Repositories
-  REPO_USER_NOT_FOUND = 2000,
+  REPO_USER_NOT_FOUND,
 
   // Use cases
-  USE_CASE_AUTH_LOGIN_USERNAME_EMPTY = 3000,
+  USE_CASE_AUTH_LOGIN_USERNAME_EMPTY,
   USE_CASE_AUTH_LOGIN_PASSWORD_EMPTY,
   USE_CASE_AUTH_LOGIN_PASSWORD_MISMATCH,
+
+#ifdef RP_TEST
+  // Test Cases
+  TEST_NOT_MATCHING_TAGS,
+  TEST_SKIPPED,
+  TEST_EXPECT_FAILED,
+  TEST_RETURN_FAIL,
+#endif
 };
 
 namespace rp {
+
+const c8* get_error_string(error_code code) noexcept;
 
 inline bool is_error(error_code code) noexcept {
   return code != error::OK;
@@ -225,17 +233,30 @@ public:
     return this->str[0] == '\0';
   }
 
-  [[nodiscard]] bool operator==(const uuid& rhs) noexcept {
+  [[nodiscard]] bool operator==(const uuid& rhs) const noexcept {
     return std::strncmp(this->str, rhs.str, SIZE) == 0;
   }
 
-  [[nodiscard]] bool operator==(const c8* str) noexcept {
+  [[nodiscard]] bool operator==(const c8* str) const noexcept {
     return str[SIZE] != '\0' && std::strncmp(this->str, str, SIZE) == 0;
   }
 
-  [[nodiscard]] bool operator==(const string& str) noexcept {
+  [[nodiscard]] bool operator==(const string& str) const noexcept {
     return str.get_size() == SIZE &&
            std::strncmp(this->str, str.c_str(), SIZE) == 0;
+  }
+
+  [[nodiscard]] bool operator!=(const uuid& rhs) const noexcept {
+    return std::strncmp(this->str, rhs.str, SIZE) != 0;
+  }
+
+  [[nodiscard]] bool operator!=(const c8* str) const noexcept {
+    return str[SIZE] == '\0' || std::strncmp(this->str, str, SIZE) != 0;
+  }
+
+  [[nodiscard]] bool operator!=(const string& str) const noexcept {
+    return str.get_size() < SIZE ||
+           std::strncmp(this->str, str.c_str(), SIZE) != 0;
   }
 
   friend bool operator==(const c8* lhs, const uuid& rhs) noexcept {
@@ -245,6 +266,15 @@ public:
   friend bool operator==(const string& lhs, const uuid& rhs) noexcept {
     return lhs.get_size() == SIZE &&
            std::strncmp(lhs.c_str(), rhs.str, SIZE) == 0;
+  }
+
+  friend bool operator!=(const c8* lhs, const uuid& rhs) noexcept {
+    return lhs[SIZE] == '\0' || std::strncmp(lhs, rhs.str, SIZE) != 0;
+  }
+
+  friend bool operator!=(const string& lhs, const uuid& rhs) noexcept {
+    return lhs.get_size() < SIZE ||
+           std::strncmp(lhs.c_str(), rhs.str, SIZE) != 0;
   }
 
 private:

@@ -10,13 +10,14 @@
 
 #include "types.hpp"
 
+#define USER_USERNAME_MAX 60
+
 namespace entity {
 
 // === Consts === //
 
 class User {
 public:
-  // Configuration on CMake maybe
   inline static const i32 USERNAME_MAX = 60;
   inline static const i32 PASSWORD_MIN = 8;
   inline static const i32 PASSWORD_MAX = 60;

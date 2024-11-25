@@ -3,10 +3,13 @@ cmake_minimum_required(VERSION 3.22.1)
 project(main VERSION 1.0.0)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+set(RP_TEST OFF "Enable re-place testing")
 
 add_executable(${PROJECT_NAME}
   src/main.cpp
+  src/types.cpp
   src/utils/logger/dev.cpp # TODO: Separate the logger to a lib
   src/utils/crypto/password.cpp
 
@@ -50,4 +53,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   llhttp_shared
   uuid argon2
 )
+
+# Test Cases
+if (RP_TEST)
+  add_subdirectory(test/integration)
+endif (RP_TEST)
 

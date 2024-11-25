@@ -59,9 +59,9 @@ error_code main_wrapper() noexcept {
 }
 
 int main(int argc, char* argv[]) {
-  auto err = main_wrapper();
-  if (err) {
-    logger::fatal("Got error code %u", err);
+  auto code = main_wrapper();
+  if (rp::is_error(code)) {
+    logger::fatal("Error: %s", rp::get_error_string(code));
     return -1;
   }
 }
