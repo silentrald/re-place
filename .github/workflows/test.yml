@@ -1,0 +1,34 @@
+
+name: Tests 📋
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code 🛒
+        uses: actions/checkout@v4
+
+      - name: Get submodules
+        run: git submodule init && bash ./submodule.sh
+
+      # TODO: Test this with ubuntu
+      - name: Install packages 📦
+        run: sudo apt-get install -y libpq-dev
+
+      # TODO: Add valkey here in the fututre
+
+      - name: Building with cmake 🔨
+        run: |
+          cd ${{ github.workspace }}
+          mkdir build
+          cd build
+          cmake .. -DRP_TEST=ON
+          make
+
+      - name: Running tests 📋
+        run: ./build/test/integration/test_integration
+

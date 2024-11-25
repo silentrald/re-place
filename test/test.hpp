@@ -18,7 +18,6 @@
   bool success = true;                                                         \
   error_code code = error::OK;
 
-// TODO: Think of a way to not use a test_function here
 #define TEST_CASE(test_case_name, tags, test_function)                         \
   if (data.test_tags(tags) == error::OK) {                                     \
     test::Return ret = test_function(test_name, test_case_name);               \
@@ -39,9 +38,9 @@
 
 #define TEST_OK return test::Return{.name = test_case_name, .code = error::OK};
 
-#define TEST_END(filename)                                                     \
+#define TEST_END()                                                             \
   printf("=== %s ===\n", test_name);                                           \
-  data.finish_test(filename);                                                  \
+  data.finish_test(__FILE__);                                                  \
   return success;
 
 #define TEST_TRY(...) GET_MACRO(__VA_ARGS__, TEST_TRY2, TEST_TRY1)(__VA_ARGS__)
@@ -207,7 +206,7 @@ struct Data {
 
       default:
         printf(
-            "\x1B[31m> [1m[BAD]  %s: %s [%s:%u]\x1B[0m\n", ret.name,
+            "\x1B[31m> [BAD]  %s: %s [%s:%u]\x1B[0m\n", ret.name,
             rp::get_error_string(ret.code), filename, ret.line
         );
         break;

@@ -8,6 +8,7 @@ r/place server alternative using c++
 
 ```bash
 git clone https://github.com/silentrald/re-place.git
+git submodule init
 /bin/bash ./submodule.sh
 ```
 

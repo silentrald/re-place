@@ -115,5 +115,5 @@ bool test::test_auth(Data& data) noexcept {
   TEST_CASE(
       "Mock Register and Login", "[mock,auth]", test_mocked_register_and_login
   );
-  TEST_END(__FILE_NAME__);
+  TEST_END();
 }

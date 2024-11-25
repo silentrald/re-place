@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 3.22.1)
 project(main VERSION 1.0.0)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(CMAKE_CXX_STANDARD 20)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+message(${CMAKE_CXX_COMPILER_ID})
 
 set(RP_TEST OFF "Enable re-place testing")
 
@@ -41,6 +44,8 @@ include_directories(external/asio/asio/include)
 add_subdirectory(external/llhttp)
 include_directories(external/llhttp/include)
 
+find_package(PostgreSQL REQUIRED)
+
 add_subdirectory(external/libvalkey)
 include_directories(external/libvalkey/include)
 
@@ -48,8 +53,8 @@ find_package(Argon2 REQUIRED)
 include_directories(external/argon2/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ds pq
-  valkey event
+  ds
+  PostgreSQL::PostgreSQL valkey
   llhttp_shared
   uuid argon2
 )
