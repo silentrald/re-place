@@ -29,6 +29,9 @@ jobs:
           cmake .. -DRP_TEST=ON
           make
 
-      - name: Running tests 📋
+      - name: Running Unit tests 📋
+        run: ./build/test/unit/test_unit
+
+      - name: Running Integration tests 📋
         run: ./build/test/integration/test_integration
 

@@ -61,6 +61,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 # Test Cases
 if (RP_TEST)
+  add_subdirectory(test/unit)
   add_subdirectory(test/integration)
 endif (RP_TEST)
 

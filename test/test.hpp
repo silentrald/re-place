@@ -97,18 +97,29 @@
   }
 
 #define EXPECT_TRUE(function)                                                  \
-  {                                                                            \
-    if (!function) {                                                           \
-      printf(                                                                  \
-          "Received Error from: %s > %s\n  %s: false\n", test_name,            \
-          test_case_name, #function                                            \
-      );                                                                       \
-      return test::Return{                                                     \
-          .name = test_case_name,                                              \
-          .code = error::TEST_EXPECT_FAILED,                                   \
-          .line = __LINE__                                                     \
-      };                                                                       \
-    }                                                                          \
+  if (!function) {                                                             \
+    printf(                                                                    \
+        "Received Error from: %s > %s\n  %s: false\n", test_name,              \
+        test_case_name, #function                                              \
+    );                                                                         \
+    return test::Return{                                                       \
+        .name = test_case_name,                                                \
+        .code = error::TEST_EXPECT_FAILED,                                     \
+        .line = __LINE__                                                       \
+    };                                                                         \
+  }
+
+#define EXPECT_FALSE(function)                                                 \
+  if (function) {                                                              \
+    printf(                                                                    \
+        "Received Error from: %s > %s\n  %s: true\n", test_name,               \
+        test_case_name, #function                                              \
+    );                                                                         \
+    return test::Return{                                                       \
+        .name = test_case_name,                                                \
+        .code = error::TEST_EXPECT_FAILED,                                     \
+        .line = __LINE__                                                       \
+    };                                                                         \
   }
 
 #define TEST_FAIL                                                              \
@@ -224,6 +235,7 @@ struct Data {
 
 enum class ExpectComparator {
   EQUAL,
+  NOT_EQUAL,
 };
 
 template <typename T, bool IsActual>
@@ -259,6 +271,15 @@ template <typename ActualType, typename ExpectedType>
       success = std::strcmp(actual, exp) == 0;
     } else {
       success = actual == exp;
+    }
+    break;
+  case ExpectComparator::NOT_EQUAL:
+    comparator_string = "!=";
+    if constexpr (std::is_same<const c8*, ActualType>::value &&
+                  std::is_same<const c8*, ExpectedType>::value) {
+      success = std::strcmp(actual, exp) != 0;
+    } else {
+      success = actual != exp;
     }
     break;
   }
