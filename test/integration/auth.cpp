@@ -94,26 +94,25 @@ service::Auth<MockUserRepo, MockSessionRepo> mock_auth_service{
     &mock_user_repo, &mock_session_repo
 };
 
-TEST_CASE_FUNCTION(test_mocked_register_and_login) {
-  const c8* username = "username";
-  const c8* password = "password";
-
-  TEST_TRY(mock_auth_service.register_user(username, password));
-  uuid session_id =
-      TEST_TRY_RETURN(mock_auth_service.login(username, password));
-
-  entity::User user = TEST_TRY_RETURN(mock_auth_service.get_user(session_id));
-
-  EXPECT(user.get_username(), username, test::ExpectComparator::EQUAL);
-  EXPECT_TRUE(crypto::verify_password(user.get_password(), password));
-
-  TEST_OK;
-}
-
 bool test::test_auth(Data& data) noexcept {
   TEST_INIT("Auth");
-  TEST_CASE(
-      "Mock Register and Login", "[mock,auth]", test_mocked_register_and_login
-  );
+
+  TEST_CASE("Mock Register and Login", "[mock,auth]") {
+    const c8* username = "username";
+    const c8* password = "password";
+
+    TEST_TRY(mock_auth_service.register_user(username, password));
+    uuid session_id =
+        TEST_TRY_RETURN(mock_auth_service.login(username, password));
+
+    entity::User user = TEST_TRY_RETURN(mock_auth_service.get_user(session_id));
+
+    EXPECT(user.get_username(), username, test::ExpectComparator::EQUAL);
+    EXPECT_TRUE(crypto::verify_password(user.get_password(), password));
+
+    TEST_OK;
+  }
+  TEST_CASE_END();
+
   TEST_END();
 }

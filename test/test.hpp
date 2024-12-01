@@ -13,28 +13,34 @@
 #include <cstring>
 #include <type_traits>
 
+#define TEST_CASE_PARAMETERS const c8 *test_name, const c8 *test_case_name
+
 #define TEST_INIT(_test_name)                                                  \
   const c8* test_name = _test_name;                                            \
+  const c8* test_case_name = nullptr;                                          \
+  bool skip = false;                                                           \
   bool success = true;                                                         \
-  error_code code = error::OK;
+  error_code code = error::OK;                                                 \
+  test::Return (*test_function)(TEST_CASE_PARAMETERS) noexcept = nullptr;
 
-#define TEST_CASE(test_case_name, tags, test_function)                         \
-  if (data.test_tags(tags) == error::OK) {                                     \
+#define TEST_CASE(_test_case_name, tags)                                       \
+  test_case_name = _test_case_name;                                            \
+  skip = data.test_tags(tags) != error::OK;                                    \
+  test_function = [](TEST_CASE_PARAMETERS) noexcept
+
+#define TEST_CASE_END()                                                        \
+  ;                                                                            \
+  if (skip) {                                                                  \
+    static_cast<void>(data.returns.push(                                       \
+        test::Return{.name = test_case_name, .code = error::TEST_SKIPPED}      \
+    ));                                                                        \
+  } else {                                                                     \
     test::Return ret = test_function(test_name, test_case_name);               \
     static_cast<void>(data.returns.push(ret));                                 \
     if (rp::is_error(ret.code)) {                                              \
       success = false;                                                         \
     }                                                                          \
-  } else {                                                                     \
-    static_cast<void>(data.returns.push(                                       \
-        test::Return{.name = test_case_name, .code = error::TEST_SKIPPED}      \
-    ));                                                                        \
   }
-
-#define TEST_CASE_FUNCTION(function_name)                                      \
-  test::Return function_name(                                                  \
-      const c8* test_name, const c8* test_case_name                            \
-  ) noexcept
 
 #define TEST_OK return test::Return{.name = test_case_name, .code = error::OK};
 
