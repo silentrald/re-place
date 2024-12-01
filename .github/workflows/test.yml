@@ -12,7 +12,7 @@ jobs:
       - name: Check out repository code 🛒
         uses: actions/checkout@v4
 
-      - name: Get submodules
+      - name: Get submodules 🗃️
         run: git submodule init && bash ./submodule.sh
 
       # TODO: Test this with ubuntu
@@ -30,8 +30,8 @@ jobs:
           make
 
       - name: Running Unit tests 📋
-        run: ./build/test/unit/test_unit
+        run: ./build/test/test_unit
 
       - name: Running Integration tests 📋
-        run: ./build/test/integration/test_integration
+        run: ./build/test/test_integration
 

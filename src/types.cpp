@@ -6,7 +6,6 @@
  *============================*/
 
 #include "./types.hpp"
-#include "entity/user.hpp"
 
 #define REQUIRED(field) field " should not be empty";
 #define STRING_INDIRECTION(x) #x
